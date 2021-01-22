@@ -87,7 +87,8 @@ def create_new_tile(tiles):
     return tile_new
 
 
-def update_dictionary(dictionary, list_of_all_tiles):
+def update_dictionary(dictionary, list_of_all_tiles, calls=0):
+    print('tiles generated: ', len(list_of_all_tiles))
     for tile in list_of_all_tiles:
         for index, vertex in enumerate(tile.vertices):
             if dictionary.get(vertex) is None:
@@ -95,6 +96,12 @@ def update_dictionary(dictionary, list_of_all_tiles):
             else:
                 if not (any(other_tiles == (tile, index) for other_tiles in dictionary[vertex])):
                     dictionary[vertex].append((tile, index))
+
+    # optimizer
+    temp = dictionary.copy()
+    for key, value in temp.items():
+        if len(value) == 5:
+            dictionary.pop(key, None)
 
 
 def check_if_tile_exists(tile, list_of_all_tiles):
@@ -128,12 +135,14 @@ def ace(key, dictionary_value, list_of_all_tiles, dictionary):
             list_of_all_tiles.append(new_kite)
             dictionary[key].append((new_kite, 3))
             print('drawing ace...')
+            update_dictionary(dictionary, list_of_all_tiles)
 
         elif sorted(right) == sorted(vertex):
             new_kite.draw_kite(kite_tile, 'bottom-left')
             list_of_all_tiles.append(new_kite)
             dictionary[key].append((new_kite, 1))
             print('drawing ace...')
+            update_dictionary(dictionary, list_of_all_tiles)
 
 
 def sun(key, dictionary_value, list_of_all_tiles, dictionary):
@@ -156,6 +165,7 @@ def sun(key, dictionary_value, list_of_all_tiles, dictionary):
                     sun(key, dictionary_value, list_of_all_tiles, dictionary)
                 # Exit loop if 5th kite is added
                 print('drawing sun...')
+                update_dictionary(dictionary, list_of_all_tiles)
                 break
 
             # Check the left side
@@ -166,6 +176,7 @@ def sun(key, dictionary_value, list_of_all_tiles, dictionary):
                 if len(tiles) == 3:
                     sun(key, dictionary_value, list_of_all_tiles, dictionary)
                 print('drawing sun...')
+                update_dictionary(dictionary, list_of_all_tiles)
 
         # Uncomment to color vertex
         # for value in dictionary[key]:
@@ -189,6 +200,7 @@ def star(key, dictionary_value, list_of_all_tiles, dictionary):
                 dictionary[key].append((new_tile, 0))
                 # Exit loop if 5th dart is added
                 print('drawing star...')
+                update_dictionary(dictionary, list_of_all_tiles)
                 break
 
             # Check the left side
@@ -197,6 +209,7 @@ def star(key, dictionary_value, list_of_all_tiles, dictionary):
                 list_of_all_tiles.append(new_tile)
                 dictionary[key].append((new_tile, 0))
                 print('drawing star...')
+                update_dictionary(dictionary, list_of_all_tiles)
 
         # Uncomment to color vertex
         # for value in dictionary[key]:
@@ -224,6 +237,7 @@ def deuce(key, dictionary_value, list_of_all_tiles, dictionary):
                 list_of_all_tiles.append(right_dart)
                 dictionary[key].append((right_dart, 3))
             print('drawing deuce...')
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         elif tiles[0].vertices[3] == tiles[1].vertices[1]:
             left_dart = Tile('dart')
@@ -239,6 +253,7 @@ def deuce(key, dictionary_value, list_of_all_tiles, dictionary):
                 list_of_all_tiles.append(right_dart)
                 dictionary[key].append((right_dart, 3))
             print('drawing deuce...')
+            update_dictionary(dictionary, list_of_all_tiles)
             return
     elif len(dictionary_value) == 3:
         tiles, indices = sparse_vertex_dictionary_value(dictionary_value)
@@ -259,12 +274,14 @@ def deuce(key, dictionary_value, list_of_all_tiles, dictionary):
             list_of_all_tiles.append(new_tile)
             dictionary[key].append((dart_tile, 3))
             print('drawing deuce...')
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         elif sorted(right_dart) == sorted(vertex):
             new_tile.draw_dart(dart_tile, 'top-left')
             list_of_all_tiles.append(new_tile)
             dictionary[key].append((dart_tile, 1))
             print('drawing deuce...')
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         elif sorted(some_kite) == sorted(vertex):
             new_tile.name = 'kite'
@@ -275,6 +292,7 @@ def deuce(key, dictionary_value, list_of_all_tiles, dictionary):
                         list_of_all_tiles.append(new_tile)
                         dictionary[key].append((new_tile, 0))
                         print('drawing deuce...')
+                        update_dictionary(dictionary, list_of_all_tiles)
                         return
                 if val[0].name == 'dart' and val[1] == 3:
                     new_tile.draw_kite(val[0], 'bottom-left')
@@ -282,6 +300,7 @@ def deuce(key, dictionary_value, list_of_all_tiles, dictionary):
                         list_of_all_tiles.append(new_tile)
                         dictionary[key].append((new_tile, 0))
                         print('drawing deuce...')
+                        update_dictionary(dictionary, list_of_all_tiles)
                         return
 
 
@@ -335,6 +354,7 @@ def jack(key, dictionary_value, list_of_all_tiles, dictionary):
                     if not check_if_tile_exists(left_dart, list_of_all_tiles):
                         list_of_all_tiles.append(left_dart)
                         dictionary[key].append((left_dart, 1))
+                    update_dictionary(dictionary, list_of_all_tiles)
                     return
                 else:
                     top_kite = Tile('kite')
@@ -355,6 +375,7 @@ def jack(key, dictionary_value, list_of_all_tiles, dictionary):
                     if not check_if_tile_exists(left_dart, list_of_all_tiles):
                         list_of_all_tiles.append(left_dart)
                         dictionary[key].append((left_dart, 1))
+                    update_dictionary(dictionary, list_of_all_tiles)
                     return
 
         if len(darts) == 2:
@@ -396,6 +417,7 @@ def jack(key, dictionary_value, list_of_all_tiles, dictionary):
                         list_of_all_tiles.append(bottom_kite)
                         dictionary[key].append((bottom_kite, 0))
                 print('drawing jack...')
+                update_dictionary(dictionary, list_of_all_tiles)
             return
 
         if len(darts) == 1:
@@ -422,6 +444,7 @@ def jack(key, dictionary_value, list_of_all_tiles, dictionary):
                             list_of_all_tiles.append(bottom_kite)
                             dictionary[key].append((bottom_kite, 0))
                         print('drawing jack...')
+                        update_dictionary(dictionary, list_of_all_tiles)
                         return
             elif darts[0][1] == 3:
                 for value in dictionary_value:
@@ -445,13 +468,13 @@ def jack(key, dictionary_value, list_of_all_tiles, dictionary):
                             list_of_all_tiles.append(bottom_kite)
                             dictionary[key].append((bottom_kite, 0))
                         print('drawing jack...')
+                        update_dictionary(dictionary, list_of_all_tiles)
                         return
 
 
 def prince(key, dictionary_value, list_of_all_tiles, dictionary):
     # A prince vertex has forced tiles, but is only partially completed. It consists of 1 dart and 2 kites.
     # Depending on which tile is placed next, the prince vertex will either become a King vertex or a Queen vertex.
-
     if len(dictionary_value) == 2:
         tiles, indices = sparse_vertex_dictionary_value(dictionary_value)
         dart, kite = None, None
@@ -470,12 +493,14 @@ def prince(key, dictionary_value, list_of_all_tiles, dictionary):
             if not check_if_tile_exists(new_kite, list_of_all_tiles):
                 list_of_all_tiles.append(new_kite)
                 dictionary[key].append((new_kite, 3))
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         if kite[0].vertices[2] == dart[0].vertices[1] and kite[0].vertices[3] == dart[0].vertices[0]:
             new_kite.draw_kite(kite[0], 'top-left')
             if not check_if_tile_exists(new_kite, list_of_all_tiles):
                 list_of_all_tiles.append(new_kite)
                 dictionary[key].append((new_kite, 1))
+            update_dictionary(dictionary, list_of_all_tiles)
             return
 
 
@@ -519,6 +544,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
                             list_of_all_tiles.append(new_right_kite)
                             dictionary[key].append((new_right_kite, 1))
                         print('drawing queen...')
+                        update_dictionary(dictionary, list_of_all_tiles)
                         return
                     elif (tiles[i].name == 'kite' and indices[i] == 3) and (tiles[i].vertices[2] == darts[0][0].vertices[2]):
                         new_left_kite.draw_kite(left_kite, 'top-right')
@@ -531,6 +557,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
                             list_of_all_tiles.append(new_right_kite)
                             dictionary[key].append((new_right_kite, 1))
                         print('drawing queen...')
+                        update_dictionary(dictionary, list_of_all_tiles)
                         return
             if len(kites) == 3:
                 dart = darts[0][0]
@@ -551,6 +578,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
                             if not check_if_tile_exists(new_kite, list_of_all_tiles):
                                 list_of_all_tiles.append(new_kite)
                                 dictionary[key].append((new_kite, 1))
+                                update_dictionary(dictionary, list_of_all_tiles)
                                 return
 
                 # missing top left kite
@@ -567,6 +595,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
                             if not check_if_tile_exists(new_kite, list_of_all_tiles):
                                 list_of_all_tiles.append(new_kite)
                                 dictionary[key].append((new_kite, 3))
+                                update_dictionary(dictionary, list_of_all_tiles)
                                 return
 
                 # counter-clockwise
@@ -583,7 +612,8 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
                             if not check_if_tile_exists(new_kite, list_of_all_tiles):
                                 list_of_all_tiles.append(new_kite)
                                 dictionary[key].append((new_kite, 1))
-                            return
+                                update_dictionary(dictionary, list_of_all_tiles)
+                                return
 
                 # clockwise
                 kite1.draw_kite(dart, 'top-left')
@@ -599,6 +629,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
                             if not check_if_tile_exists(new_kite, list_of_all_tiles):
                                 list_of_all_tiles.append(new_kite)
                                 dictionary[key].append((new_kite, 3))
+                                update_dictionary(dictionary, list_of_all_tiles)
                                 return
 
         elif sorted([('kite', 1), ('kite', 3), ('kite', 3)]) == sorted(vertex):
@@ -625,6 +656,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
             if not check_if_tile_exists(new_dart, list_of_all_tiles):
                 list_of_all_tiles.append(new_dart)
                 dictionary[key].append((new_dart, 0))
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         elif sorted([('kite', 1), ('kite', 1), ('kite', 3)]) == sorted(vertex):
             v3_kite = None
@@ -650,6 +682,7 @@ def queen(key, dictionary_value, list_of_all_tiles, dictionary):
             if not check_if_tile_exists(new_dart, list_of_all_tiles):
                 list_of_all_tiles.append(new_dart)
                 dictionary[key].append((new_dart, 0))
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         elif sorted([('kite', 1), ('kite', 1), ('kite', 3), ('kite', 3)]) == sorted(vertex):
             print('Final Queen\'s case still needs to be implemented')
@@ -681,6 +714,7 @@ def king(key, dictionary_value, list_of_all_tiles, dictionary):
                 if not check_if_tile_exists(new_kite, list_of_all_tiles):
                     list_of_all_tiles.append(new_kite)
                     dictionary[key].append((new_kite, 1))
+            update_dictionary(dictionary, list_of_all_tiles)
             return
         if len(darts) == 2 and len(kites) == 2:
             right_dart = None
@@ -698,6 +732,7 @@ def king(key, dictionary_value, list_of_all_tiles, dictionary):
                 if not check_if_tile_exists(new_dart, list_of_all_tiles):
                     list_of_all_tiles.append(new_dart)
                     dictionary[key].append((new_dart, 0))
+                update_dictionary(dictionary, list_of_all_tiles)
 
 
 def force_tiles(dictionary, list_of_all_tiles):
@@ -712,7 +747,6 @@ def force_tiles(dictionary, list_of_all_tiles):
         queen(key, value, list_of_all_tiles, dictionary)
         king(key, value, list_of_all_tiles, dictionary)
 
-        update_dictionary(dictionary, list_of_all_tiles)
     if not (total == dictionary):
         force_tiles(dictionary, list_of_all_tiles)
 
@@ -725,13 +759,6 @@ while game_is_running:
 
     # Background color
     screen.fill((0, 0, 0))
-
-    # Stop if too many tiles are created
-    if len(all_tiles) >= 800:
-        print('Too many Tiles; Ending program...')
-        pygame.time.wait(30000)
-        game_is_running = False
-
     # Event handler
     for event in pygame.event.get():
         # Exit
@@ -749,7 +776,7 @@ while game_is_running:
                 update_dictionary(vertex_dictionary, list_of_all_tiles=all_tiles)
                 # Check for forced tiles
                 force_tiles(vertex_dictionary, list_of_all_tiles=all_tiles)
-                print('tiles generated: ', len(all_tiles))
+                print('vertex dictionary size: ', len(vertex_dictionary))
                 print('------------------------------')
         if event.type == pygame.KEYUP:
             if event.key == pygame.K_SPACE:
@@ -764,7 +791,7 @@ while game_is_running:
                     vertex_dictionary[tile_to_remove.vertices[3]].remove((tile_to_remove, 3))
                     all_tiles.pop()
 
-    for t in all_tiles:
-        pygame.draw.polygon(screen, t.color, t.vertices)
+        for eggs in all_tiles:
+            pygame.draw.polygon(screen, eggs.color, eggs.vertices, width=2)
 
-    pygame.display.update()
+        pygame.display.update()

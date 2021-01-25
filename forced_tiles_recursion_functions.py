@@ -2,22 +2,32 @@ from tiles import Tile
 
 
 def force_tiles(dictionary, list_of_all_tiles):
+    if len(dictionary) >= 5000:
+        print('Force stop; something may have gone wrong.')
+        return
     total = dictionary.copy()
     for key, value in total.items():
         vertex_tiles = []
         for val in value:
             vertex_tiles.append((val[0].name, val[1]))  # (tile's name, tile's vertex contained in the key) ex. ('kite' ,0)
         vertex_tiles = sorted(vertex_tiles)
-
-        ace(vertex_tiles, value, dictionary, list_of_all_tiles)
-        sun(vertex_tiles, value, dictionary, list_of_all_tiles)
-        star(vertex_tiles, value, dictionary, list_of_all_tiles)
-        deuce(vertex_tiles, value, dictionary, list_of_all_tiles)
-        jack(vertex_tiles, value, dictionary, list_of_all_tiles)
-        queen(vertex_tiles, value, dictionary, list_of_all_tiles)
-
-        prince(vertex_tiles, value, dictionary, list_of_all_tiles)
-        king(vertex_tiles, value, dictionary, list_of_all_tiles)
+        if ace(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if deuce(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if sun(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if star(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if jack(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if queen(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if prince(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if king(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+    remove_completed_vertices(dictionary)
     if not (total == dictionary):
         force_tiles(dictionary, list_of_all_tiles)
 
@@ -31,13 +41,13 @@ def ace(vertex_components, vertex_values, dictionary, list_tiles):
 
         right_kite = Tile('kite')
         right_kite.draw_kite(dart, 'bottom-left')
-        if not check_if_tile_exists(right_kite, list_tiles):
+        if not check_if_tile_exists(right_kite, vertex_values):
             list_tiles.append(right_kite)
             update_dictionary(dictionary, right_kite)
 
         left_kite = Tile('kite')
         left_kite.draw_kite(dart, 'bottom-right')
-        if not check_if_tile_exists(left_kite, list_tiles):
+        if not check_if_tile_exists(left_kite, vertex_values):
             list_tiles.append(left_kite)
             update_dictionary(dictionary, left_kite)
         return True
@@ -49,10 +59,11 @@ def sun(vertex_components, vertex_values, dictionary, list_tiles):
         new_tile = Tile('kite')
         for val in vertex_values:
             new_tile.draw_kite(val[0], 'bottom-right')
-            if not check_if_tile_exists(new_tile, list_tiles):
+            if not check_if_tile_exists(new_tile, vertex_values):
                 list_tiles.append(new_tile)
                 update_dictionary(dictionary, new_tile)
                 return True
+
     elif vertex_components.count(('kite', 2)) == 3:
         total = 0
         for val in vertex_values:
@@ -60,13 +71,13 @@ def sun(vertex_components, vertex_values, dictionary, list_tiles):
             new_tile_left = Tile('kite')
 
             new_tile_right.draw_kite(val[0], 'bottom-right')
-            if not check_if_tile_exists(new_tile_right, list_tiles):
+            if not check_if_tile_exists(new_tile_right, vertex_values):
                 list_tiles.append(new_tile_right)
                 update_dictionary(dictionary, new_tile_right)
                 total += 1
 
             new_tile_left.draw_kite(val[0], 'bottom-left')
-            if not check_if_tile_exists(new_tile_left, list_tiles):
+            if not check_if_tile_exists(new_tile_left, vertex_values):
                 list_tiles.append(new_tile_left)
                 update_dictionary(dictionary, new_tile_left)
                 total += 1
@@ -81,7 +92,7 @@ def star(vertex_components, vertex_values, dictionary, list_tiles):
         new_tile = Tile('dart')
         for val in vertex_values:
             new_tile.draw_dart(val[0], 'top-right')
-            if not check_if_tile_exists(new_tile, list_tiles):
+            if not check_if_tile_exists(new_tile, vertex_values):
                 list_tiles.append(new_tile)
                 update_dictionary(dictionary, new_tile)
                 return True
@@ -107,16 +118,17 @@ def deuce(vertex_components, vertex_values, dictionary, list_tiles):
             new_left_dart.draw_dart(kite1, 'top-right')
             new_right_dart.draw_dart(kite2, 'top-left')
 
-        if not check_if_tile_exists(new_left_dart, list_tiles):
+        if not check_if_tile_exists(new_left_dart, vertex_values):
             list_tiles.append(new_left_dart)
             update_dictionary(dictionary, new_left_dart)
-        if not check_if_tile_exists(new_right_dart, list_tiles):
+        if not check_if_tile_exists(new_right_dart, vertex_values):
             list_tiles.append(new_right_dart)
             update_dictionary(dictionary, new_right_dart)
         return True
     return False
 
 
+# I think the jack may be passing by disguised as a Sun
 def jack(vertex_components, vertex_values, dictionary, list_tiles):
     total = vertex_components.count(('dart', 1)) + vertex_components.count(('dart', 3))
     if total == 1 and ('kite', 2) in vertex_components and ('dart', 1) in vertex_components:
@@ -135,17 +147,17 @@ def jack(vertex_components, vertex_values, dictionary, list_tiles):
         top_left_kite.draw_kite(dart, 'top-right')
         top_right_kite.draw_kite(top_left_kite, 'bottom-right')
 
-        if not check_if_tile_exists(bottom_kite, list_tiles):
+        if not check_if_tile_exists(bottom_kite, vertex_values):
             list_tiles.append(bottom_kite)
             update_dictionary(dictionary, bottom_kite)
-        if not check_if_tile_exists(new_dart, list_tiles):
+        if not check_if_tile_exists(new_dart, vertex_values):
             list_tiles.append(new_dart)
             update_dictionary(dictionary, new_dart)
 
-        if not check_if_tile_exists(top_left_kite, list_tiles):
+        if not check_if_tile_exists(top_left_kite, vertex_values):
             list_tiles.append(top_left_kite)
             update_dictionary(dictionary, top_left_kite)
-        if not check_if_tile_exists(top_right_kite, list_tiles):
+        if not check_if_tile_exists(top_right_kite, vertex_values):
             list_tiles.append(top_right_kite)
             update_dictionary(dictionary, top_right_kite)
         return True
@@ -165,16 +177,16 @@ def jack(vertex_components, vertex_values, dictionary, list_tiles):
         bottom_kite.draw_kite(dart, 'bottom-left')
         new_dart.draw_dart(bottom_kite, 'top-left')
 
-        if not check_if_tile_exists(top_left_kite, list_tiles):
+        if not check_if_tile_exists(top_left_kite, vertex_values):
             list_tiles.append(top_left_kite)
             update_dictionary(dictionary, top_left_kite)
-        if not check_if_tile_exists(top_right_kite, list_tiles):
+        if not check_if_tile_exists(top_right_kite, vertex_values):
             list_tiles.append(top_right_kite)
             update_dictionary(dictionary, top_right_kite)
-        if not check_if_tile_exists(bottom_kite, list_tiles):
+        if not check_if_tile_exists(bottom_kite, vertex_values):
             list_tiles.append(bottom_kite)
             update_dictionary(dictionary, bottom_kite)
-        if not check_if_tile_exists(new_dart, list_tiles):
+        if not check_if_tile_exists(new_dart, vertex_values):
             list_tiles.append(new_dart)
             update_dictionary(dictionary, new_dart)
         return True
@@ -197,15 +209,15 @@ def jack(vertex_components, vertex_values, dictionary, list_tiles):
         top_right_kite.draw_kite(right_dart, 'top-left')
         bottom_kite.draw_kite(left_dart, 'bottom-right')
 
-        if not check_if_tile_exists(top_left_kite, list_tiles):
+        if not check_if_tile_exists(top_left_kite, vertex_values):
             list_tiles.append(top_left_kite)
             update_dictionary(dictionary, top_left_kite)
 
-        if not check_if_tile_exists(top_right_kite, list_tiles):
+        if not check_if_tile_exists(top_right_kite, vertex_values):
             list_tiles.append(top_right_kite)
             update_dictionary(dictionary, top_right_kite)
 
-        if not check_if_tile_exists(bottom_kite, list_tiles):
+        if not check_if_tile_exists(bottom_kite, vertex_values):
             list_tiles.append(bottom_kite)
             update_dictionary(dictionary, bottom_kite)
         return True
@@ -224,18 +236,18 @@ def queen(vertex_components, vertex_values, dictionary, list_tiles):
         left_kite.draw_kite(dart, 'top-left')
         right_kite.draw_kite(dart, 'top-right')
 
-        if check_if_tile_exists(left_kite, list_tiles) and check_if_tile_exists(right_kite, list_tiles):
+        if check_if_tile_exists(left_kite, vertex_values) and check_if_tile_exists(right_kite, vertex_values):
             top_right_kite = Tile('kite')
             top_left_kite = Tile('kite')
 
             top_right_kite.draw_kite(right_kite, 'top-left')
             top_left_kite.draw_kite(left_kite, 'top-right')
 
-            if not check_if_tile_exists(top_right_kite, list_tiles):
+            if not check_if_tile_exists(top_right_kite, vertex_values):
                 list_tiles.append(top_right_kite)
                 update_dictionary(dictionary, top_right_kite)
 
-            if not check_if_tile_exists(top_left_kite, list_tiles):
+            if not check_if_tile_exists(top_left_kite, vertex_values):
                 list_tiles.append(top_left_kite)
                 update_dictionary(dictionary, top_left_kite)
     if vertex_components.count(('kite', 1)) + vertex_components.count(('kite', 3)) == 3:
@@ -264,10 +276,10 @@ def queen(vertex_components, vertex_values, dictionary, list_tiles):
                 temp_kite.draw_kite(new_dart, 'top-left')
                 new_kite.draw_kite(temp_kite, 'top-right')
 
-            if not check_if_tile_exists(new_dart, list_tiles):
+            if not check_if_tile_exists(new_dart, vertex_values):
                 list_tiles.append(new_dart)
                 update_dictionary(dictionary, new_dart)
-            if not check_if_tile_exists(new_kite, list_tiles):
+            if not check_if_tile_exists(new_kite, vertex_values):
                 list_tiles.append(new_kite)
                 update_dictionary(dictionary, new_kite)
             return True
@@ -296,10 +308,10 @@ def queen(vertex_components, vertex_values, dictionary, list_tiles):
                 temp_kite.draw_kite(new_dart, 'top-right')
                 new_kite.draw_kite(temp_kite, 'top-left')
 
-            if not check_if_tile_exists(new_dart, list_tiles):
+            if not check_if_tile_exists(new_dart, vertex_values):
                 list_tiles.append(new_dart)
                 update_dictionary(dictionary, new_dart)
-            if not check_if_tile_exists(new_kite, list_tiles):
+            if not check_if_tile_exists(new_kite, vertex_values):
                 list_tiles.append(new_kite)
                 update_dictionary(dictionary, new_kite)
             return True
@@ -318,13 +330,13 @@ def prince(vertex_components, vertex_values, dictionary, list_tiles):
         new_kite = Tile('kite')
         if dart.vertices[1] == kite.vertices[2]:
             new_kite.draw_kite(kite, 'top-left')
-            if not check_if_tile_exists(new_kite, list_tiles):
+            if not check_if_tile_exists(new_kite, vertex_values):
                 list_tiles.append(new_kite)
                 update_dictionary(dictionary, new_kite)
                 return True
         elif dart.vertices[3] == kite.vertices[2]:
             new_kite.draw_kite(kite, 'top-right')
-            if not check_if_tile_exists(new_kite, list_tiles):
+            if not check_if_tile_exists(new_kite, vertex_values):
                 list_tiles.append(new_kite)
                 update_dictionary(dictionary, new_kite)
                 return True
@@ -351,16 +363,16 @@ def king(vertex_components, vertex_values, dictionary, list_tiles):
             dart2.draw_dart(dart1, 'top-right')
             dart3.draw_dart(dart2, 'top-right')
 
-            if not check_if_tile_exists(kite, list_tiles):
+            if not check_if_tile_exists(kite, vertex_values):
                 list_tiles.append(kite)
                 update_dictionary(dictionary, kite)
-            if not check_if_tile_exists(dart1, list_tiles):
+            if not check_if_tile_exists(dart1, vertex_values):
                 list_tiles.append(dart1)
                 update_dictionary(dictionary, dart1)
-            if not check_if_tile_exists(dart2, list_tiles):
+            if not check_if_tile_exists(dart2, vertex_values):
                 list_tiles.append(dart2)
                 update_dictionary(dictionary, dart2)
-            if not check_if_tile_exists(dart3, list_tiles):
+            if not check_if_tile_exists(dart3, vertex_values):
                 list_tiles.append(dart3)
                 update_dictionary(dictionary, dart3)
         else:
@@ -372,24 +384,27 @@ def king(vertex_components, vertex_values, dictionary, list_tiles):
             dart2.draw_dart(dart1, 'top-left')
             dart3.draw_dart(dart2, 'top-left')
 
-            if not check_if_tile_exists(kite, list_tiles):
+            if not check_if_tile_exists(kite, vertex_values):
                 list_tiles.append(kite)
                 update_dictionary(dictionary, kite)
-            if not check_if_tile_exists(dart1, list_tiles):
+            if not check_if_tile_exists(dart1, vertex_values):
                 list_tiles.append(dart1)
                 update_dictionary(dictionary, dart1)
-            if not check_if_tile_exists(dart2, list_tiles):
+            if not check_if_tile_exists(dart2, vertex_values):
                 list_tiles.append(dart2)
                 update_dictionary(dictionary, dart2)
-            if not check_if_tile_exists(dart3, list_tiles):
+            if not check_if_tile_exists(dart3, vertex_values):
                 list_tiles.append(dart3)
                 update_dictionary(dictionary, dart3)
         return True
     return False
 
 
-def check_if_tile_exists(tile, list_of_all_tiles):
-    return any(other_tile.vertices == tile.vertices for other_tile in list_of_all_tiles)
+def check_if_tile_exists(tile, dictionary_values):
+    for value in dictionary_values:
+        if tile == value[0]:
+            return True
+    return False
 
 
 def update_dictionary(dictionary, new_tile):
@@ -400,12 +415,10 @@ def update_dictionary(dictionary, new_tile):
             if not (any(other_tiles == (new_tile, index) for other_tiles in dictionary[vertex])):
                 dictionary[vertex].append((new_tile, index))
 
-    # The problem is when the dictionary is updated it traverses every tile and creates a new entry for every vertex
-    # that does exists in the dictionary already. Then down below, the optimizer removes all vertex dictionary entries
-    # that conform to the requirements. So the dictionary is constantly being built and torn apart every time this
-    # function is called.
-    # Solution: traverse only the new tile and add them to the dictionary rather than traversing all tiles
 
+def remove_completed_vertices(dictionary):
+    # Below is the functionality for removing completed vertices
+    # I should separate this loop into its own function
     temp = dictionary.copy()
     for key, value in temp.items():
         if len(value) == 5:

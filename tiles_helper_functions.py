@@ -1,5 +1,4 @@
 import math
-import numpy as np
 
 
 # ***** The Rounding Problem *****
@@ -14,13 +13,25 @@ import numpy as np
 # errors which causes new tiles to be placed on top of already existing tiles or not placed at all.
 # Therefore the optimal values I have found are: n=3 and std_length=50
 #
-# When I decrease the std_length, I need to increase n.
-
-def round_coordinates(coordinates, n=4):
+# When I decrease the std_length, I need to increase n. Not exactly sure what the problem is.
+# Pairings: (n = 4, std_length = 25), (5, 17), (6, 12)
+def round_coordinates(coordinates, n=6):
     rounded = []
     for val in coordinates:
         rounded.append((round(val[0], n), round(val[1], n)))
     return rounded
+
+
+def truncate_coordinates(coordinates, n=8):
+    return_list = []
+    for val in coordinates:
+        return_list.append((truncate(val[0], n), truncate(val[1], n)))
+    return return_list
+
+
+def truncate(value, n):
+    x = 10.0 ** n
+    return math.trunc(x * value) / x
 
 
 def rotate_point(point_to_rotate, point_of_rotation, degrees_of_rotation):
@@ -35,15 +46,3 @@ def rotate_point(point_to_rotate, point_of_rotation, degrees_of_rotation):
             point_to_rotate[1] - point_of_rotation[1]) * math.cos(radians)
 
     return new_X, new_Y
-
-
-def truncate_coordinates(coordinates, n=4):
-    return_list = []
-    for val in coordinates:
-        return_list.append((truncate(val[0], n), truncate(val[1], n)))
-    return return_list
-
-
-def truncate(value, n):
-    x = 10.0 ** n
-    return math.trunc(x * value) / x

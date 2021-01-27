@@ -41,8 +41,8 @@ class Tile:
 
         self.vertices = round_coordinates([v0, v1, v2, v3])
 
-    def set_color(self, color=(10, 10, 10)):
-        self.color = color
+    def set_random_color(self):
+        self.color = (random.randint(10, 255), random.randint(10, 255), random.randint(10, 255))
 
     def draw_kite(self, from_tile, direction):
         p0, p1, p2, p3 = from_tile.vertices
@@ -56,28 +56,28 @@ class Tile:
                 v2 = p2
                 v3 = p1
             elif direction == 'bottom-left':
-                v0 = rotate_point(p0, p2, -72)
+                v0 = rotate_point(p0, p2, 288)
                 v1 = p3
                 v2 = p2
-                v3 = rotate_point(p3, p2, -72)
+                v3 = rotate_point(p3, p2, 288)
             elif direction == 'top-right':
                 v0 = p0
-                v1 = rotate_point(p3, p0,72)
+                v1 = rotate_point(p3, p0, 72)
                 v2 = rotate_point(p2, p1, 144)
                 v3 = p1
             elif direction == 'top-left':
                 v0 = p0
                 v1 = p3
-                v2 = rotate_point(p2, p3, -144)
-                v3 = rotate_point(p1, p0, -72)
+                v2 = rotate_point(p2, p3, 216)
+                v3 = rotate_point(p1, p0, 288)
             else:
                 print('there\'s a spelling error')
         # Kite to Dart
         else:
             if direction == 'bottom-right':
                 v0 = p1
-                v1 = rotate_point(p2, p1, -144)
-                v2 = rotate_point(p0, p1, -108)
+                v1 = rotate_point(p2, p1, 216)
+                v2 = rotate_point(p0, p1, 252)
                 v3 = p2
             elif direction == 'bottom-left':
                 v0 = v3
@@ -85,7 +85,7 @@ class Tile:
                 v2 = rotate_point(p0, p3, 108)
                 v3 = rotate_point(p2, p3, 144)
             elif direction == 'top-right':
-                v0 = rotate_point(p2, p0, -108)
+                v0 = rotate_point(p2, p0, 252)
                 v1 = rotate_point(p0, p1, 72)
                 v2 = p1
                 v3 = p0
@@ -93,7 +93,7 @@ class Tile:
                 v0 = rotate_point(p2, p0, 108)
                 v1 = p0
                 v2 = p3
-                v3 = rotate_point(p0, p3, -72)
+                v3 = rotate_point(p0, p3, 288)
             else:
                 print('there\'s a spelling error')
 
@@ -107,8 +107,8 @@ class Tile:
         if from_tile.name == 'kite':
             if direction == 'bottom-right':
                 v0 = p1
-                v1 = rotate_point(p2, p1, -72)
-                v2 = rotate_point(p0, p1, -108)
+                v1 = rotate_point(p2, p1, 288)
+                v2 = rotate_point(p0, p1, 252)
                 v3 = p2
             elif direction == 'bottom-left':
                 v0 = p3
@@ -116,8 +116,8 @@ class Tile:
                 v2 = rotate_point(p0, p3, 108)
                 v3 = rotate_point(p2, p3, 72)
             elif direction == 'top-right':
-                v0 = rotate_point(p2, p0, -108)
-                v1 = rotate_point(p0, p1, -144)
+                v0 = rotate_point(p2, p0, 252)
+                v1 = rotate_point(p0, p1, 216)
                 v2 = p1
                 v3 = p0
             elif direction == 'top-left':
@@ -131,8 +131,8 @@ class Tile:
         else:
             if direction == 'top-right' or direction == 'bottom-right':
                 v0 = p0
-                v1 = rotate_point(p1, p0, -72)
-                v2 = rotate_point(p2, p0, -72)
+                v1 = rotate_point(p1, p0, 288)
+                v2 = rotate_point(p2, p0, 288)
                 v3 = p1
             elif direction == 'top-left' or direction == 'bottom-left':
                 v0 = p0

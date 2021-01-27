@@ -2,11 +2,11 @@ import pygame
 import math
 import time
 from tiles import Tile
-from tiles_helper_functions import round_coordinates
-from forced_tiles_recursion_functions import force_tiles, update_dictionary
+from forced_tiles_recursion_functions import force_tiles, update_dictionary, remove_completed_vertices
+from deflation import deflate
 
 # Global Constants
-PHI = (1 + math.sqrt(5)) / 2
+PHI = (1 + math.sqrt(5)) / 2  # 1.618033988749895
 STD_LEN = 12
 
 # Initializer
@@ -34,7 +34,7 @@ build_animation = False
 
 # Pregame Initializations
 initial_tile = Tile(name='kite', tile_id=0)
-initial_tile.initial_shape((screenX / 2, round(screenY / 2 - STD_LEN * PHI, 4)), length=STD_LEN)
+initial_tile.initial_shape(((screenX / 2) - 0, round(screenY / 2 - STD_LEN * PHI, 4) + 0), length=STD_LEN)
 
 # Information Holders
 all_tiles = [initial_tile]
@@ -137,22 +137,27 @@ while game_is_running:
             if event.key == pygame.K_SPACE:
                 print('Next shape: dart') if kite_is_selected else print('Next shape: kite')
                 kite_is_selected = not kite_is_selected
-            elif event.key == pygame.K_k:
+            elif event.key == pygame.K_k:   # wire-frame
                 dark_mode = not dark_mode
-            elif event.key == pygame.K_b:
+            elif event.key == pygame.K_l:   # new random colors
+                for t in all_tiles:
+                    t.set_random_color()
+            elif event.key == pygame.K_r:   # reset
+                all_tiles = [initial_tile]
+                vertex_dictionary = {}
+                update_dictionary(vertex_dictionary, initial_tile)
+            elif event.key == pygame.K_b:   # build animation
                 build_animation = True
-            elif event.key == pygame.K_c:
+            elif event.key == pygame.K_c:   # color current tiles
                 for tile in all_tiles:
                     tile.color = (5, 13, 174)
-            elif event.key == pygame.K_z:
-                if len(all_tiles) > 1:
-                    tile_to_remove = all_tiles[-1]
-                    vertex_dictionary[tile_to_remove.vertices[0]].remove((tile_to_remove, 0))
-                    vertex_dictionary[tile_to_remove.vertices[1]].remove((tile_to_remove, 1))
-                    vertex_dictionary[tile_to_remove.vertices[2]].remove((tile_to_remove, 2))
-                    vertex_dictionary[tile_to_remove.vertices[3]].remove((tile_to_remove, 3))
-                    all_tiles.pop()
-
+            elif event.key == pygame.K_d:   # deflate
+                start = time.time()
+                all_tiles, vertex_dictionary = deflate(all_tiles)
+                force_tiles(vertex_dictionary, all_tiles)
+                tiles_generated = show_stats(tiles_generated)
+                end = time.time()
+                print('build time: ', round(end - start, 4), 'sec')
         if build_animation:
             for bacon in range(1, len(all_tiles)+1):
                 for eggs in all_tiles[:bacon]:

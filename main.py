@@ -2,12 +2,8 @@ import pygame
 import math
 import time
 from tiles import Tile
-from forced_tiles_recursion_functions import force_tiles, update_dictionary, remove_completed_vertices
+from forced_tiles_recursion_functions import force_tiles, update_dictionary, royal_butler
 from deflation import deflate
-
-# Global Constants
-PHI = (1 + math.sqrt(5)) / 2  # 1.618033988749895
-STD_LEN = 12
 
 # Initializer
 pygame.init()
@@ -33,13 +29,15 @@ dark_mode = False
 build_animation = False
 
 # Pregame Initializations
+phi = (1 + math.sqrt(5)) / 2
 initial_tile = Tile(name='kite', tile_id=0)
-initial_tile.initial_shape(((screenX / 2) - 0, round(screenY / 2 - STD_LEN * PHI, 4) + 0), length=STD_LEN)
+initial_tile.initial_shape((screenX / 2, screenY / 2), length=11)
 
 # Information Holders
 all_tiles = [initial_tile]
 vertex_dictionary = {}  # { vertex: (Tile, vertex_index) }
 tiles_generated = 1
+level = -1
 
 
 def show_stats(amount):
@@ -47,6 +45,11 @@ def show_stats(amount):
     print('tiles generated: ', len(all_tiles)-amount)
     print('total tiles: ', len(all_tiles))
     print('------------------------------------------')
+    v0, v1, v2, v3 = all_tiles[0].vertices
+    if all_tiles[0].name == 'kite':
+        print('std_len: ', distance_formula(v0, v1))
+    else:
+        print('std_len: ', distance_formula(v1, v2))
     return len(all_tiles)
 
 
@@ -139,25 +142,65 @@ while game_is_running:
                 kite_is_selected = not kite_is_selected
             elif event.key == pygame.K_k:   # wire-frame
                 dark_mode = not dark_mode
+            elif event.key == pygame.K_q:
+                game_is_running = False
             elif event.key == pygame.K_l:   # new random colors
                 for t in all_tiles:
                     t.set_random_color()
             elif event.key == pygame.K_r:   # reset
+                level = 1
                 all_tiles = [initial_tile]
                 vertex_dictionary = {}
                 update_dictionary(vertex_dictionary, initial_tile)
             elif event.key == pygame.K_b:   # build animation
                 build_animation = True
+            elif event.key == pygame.K_1:
+                initial_tile.name = 'kite'
+                initial_tile.initial_shape((screenX / 2, screenY / 2), length=11)
+
+                kite1, kite2 = Tile('kite'), Tile('kite')
+                dart1, dart2 = Tile('dart'), Tile('dart')
+
+                dart1.draw_dart(initial_tile, 'top-left')
+                dart2.draw_dart(initial_tile, 'top-right')
+                kite1.draw_kite(dart1, 'top-right')
+                kite2.draw_kite(dart2, 'top-left')
+                vertex_dictionary, all_tiles = royal_butler([initial_tile, dart1, dart2, kite1, kite2])
+            elif event.key == pygame.K_2:
+                initial_tile.name = 'dart'
+                initial_tile.initial_shape((screenX / 2, screenY / 2), length=11)
+
+                kite1, kite2, kite3, kite4 = Tile('kite'), Tile('kite'), Tile('kite'), Tile('kite')
+                kite1.draw_kite(initial_tile, 'top-left')
+                kite2.draw_kite(initial_tile, 'top-right')
+                kite3.draw_kite(kite1, 'top-right')
+                kite4.draw_kite(kite2, 'top-left')
+                vertex_dictionary, all_tiles = royal_butler([initial_tile, kite1, kite2, kite3, kite4])
+            elif event.key == pygame.K_3:
+                initial_tile.name = 'dart'
+                initial_tile.initial_shape((screenX / 2, screenY / 2), length=11)
+                kite1, kite2 = Tile('kite'), Tile('kite')
+                dart1, dart2 = Tile('dart'), Tile('dart')
+                dart1.draw_dart(initial_tile, 'top-left')
+                dart2.draw_dart(initial_tile, 'top-right')
+                kite1.draw_kite(dart1, 'top-left')
+                kite2.draw_kite(dart2, 'top-right')
+                vertex_dictionary, all_tiles = royal_butler([initial_tile, dart1, dart2, kite1, kite2])
             elif event.key == pygame.K_c:   # color current tiles
                 for tile in all_tiles:
                     tile.color = (5, 13, 174)
             elif event.key == pygame.K_d:   # deflate
-                start = time.time()
-                all_tiles, vertex_dictionary = deflate(all_tiles)
-                force_tiles(vertex_dictionary, all_tiles)
-                tiles_generated = show_stats(tiles_generated)
-                end = time.time()
-                print('build time: ', round(end - start, 4), 'sec')
+                if level < 3:
+                    level += 1
+                    start = time.time()
+                    all_tiles, vertex_dictionary = deflate(all_tiles)
+                    force_tiles(vertex_dictionary, all_tiles)
+                    tiles_generated = show_stats(tiles_generated)
+                    end = time.time()
+                    print('build time: ', round(end - start, 4), 'sec')
+                else:
+                    print('max depth reached')
+
         if build_animation:
             for bacon in range(1, len(all_tiles)+1):
                 for eggs in all_tiles[:bacon]:
@@ -167,7 +210,7 @@ while game_is_running:
                         pygame.draw.polygon(screen, eggs.color, eggs.vertices, width=2)
                 pygame.display.update()
 
-                build_time = int((3.25*1000)/len(all_tiles))
+                build_time = 1000
                 if build_time == 0:
                     build_time = 1
                 pygame.time.wait(build_time)

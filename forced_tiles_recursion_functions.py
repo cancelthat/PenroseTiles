@@ -1,4 +1,15 @@
+import math
+
 from tiles import Tile
+
+
+def royal_butler(tiles_attached_to_vertex: list) -> (dict, list):
+    my_list = tiles_attached_to_vertex.copy()
+    my_dictionary = {}
+    for tile in tiles_attached_to_vertex:
+        update_dictionary(my_dictionary, tile)
+    force_tiles(my_dictionary, my_list)
+    return my_dictionary, my_list
 
 
 def force_tiles(dictionary, list_of_all_tiles):
@@ -10,23 +21,77 @@ def force_tiles(dictionary, list_of_all_tiles):
         vertex_tiles = []
         for val in value:
             vertex_tiles.append((val[0].name, val[1]))  # (tile's name, tile's vertex contained in the key) ex. ('kite' ,0)
+
         vertex_tiles = sorted(vertex_tiles)
+
+        if queen(vertex_tiles, value, dictionary, list_of_all_tiles):
+            queen_tiles = []
+            for val in dictionary[key]:
+                queen_tiles.append(val[0])
+
+            for tile in queen_tiles:
+                for vertex in tile.vertices:
+                    vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
+                    if dictionary.get(vertex_key) is None:
+                        pass
+                    else:
+                        vertex_tiles = []
+                        for item in dictionary[vertex_key]:
+                            vertex_tiles.append((item[0].name, item[1]))
+
+                        ace(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+                        deuce(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+                        jack(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+            continue
+        if king(vertex_tiles, value, dictionary, list_of_all_tiles):
+            king_tiles = []
+            for val in dictionary[key]:
+                king_tiles.append(val[0])
+
+            for tile in king_tiles:
+                for vertex in tile.vertices:
+                    vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
+                    if dictionary.get(vertex_key) is None:
+                        pass
+                    else:
+                        vertex_tiles = []
+                        for item in dictionary[vertex_key]:
+                            vertex_tiles.append((item[0].name, item[1]))
+
+                        ace(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+                        deuce(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+                        jack(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+            continue
+        if jack(vertex_tiles, value, dictionary, list_of_all_tiles):
+            jack_tiles = []
+            for val in dictionary[key]:
+                jack_tiles.append(val[0])
+
+            for tile in jack_tiles:
+                for vertex in tile.vertices:
+                    vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
+                    if dictionary.get(vertex_key) is None:
+                        pass
+                    else:
+                        vertex_tiles = []
+                        for item in dictionary[vertex_key]:
+                            vertex_tiles.append((item[0].name, item[1]))
+
+                        ace(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+                        deuce(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+                        sun(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+            continue
+        if prince(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if star(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if sun(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
         if ace(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue
         if deuce(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue
-        if sun(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
-        if star(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
-        if jack(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
-        if queen(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
-        if prince(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
-        if king(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
+
     remove_completed_vertices(dictionary)
     if not (total == dictionary):
         force_tiles(dictionary, list_of_all_tiles)
@@ -111,7 +176,7 @@ def deuce(vertex_components, vertex_values, dictionary, list_tiles):
 
         new_left_dart = Tile('dart')
         new_right_dart = Tile('dart')
-        if kite1.vertices[1] == kite2.vertices[3]:
+        if compare_vertices(kite1.vertices[1], kite2.vertices[3]):
             new_left_dart.draw_dart(kite1, 'top-left')
             new_right_dart.draw_dart(kite2, 'top-right')
         else:
@@ -128,7 +193,6 @@ def deuce(vertex_components, vertex_values, dictionary, list_tiles):
     return False
 
 
-# I think the jack may be passing by disguised as a Sun
 def jack(vertex_components, vertex_values, dictionary, list_tiles):
     total = vertex_components.count(('dart', 1)) + vertex_components.count(('dart', 3))
     if total == 1 and ('kite', 2) in vertex_components and ('dart', 1) in vertex_components:
@@ -199,7 +263,7 @@ def jack(vertex_components, vertex_values, dictionary, list_tiles):
                 elif val[1] == 3:
                     right_dart = val[0]
 
-        if left_dart.vertices[0] == right_dart.vertices[0]:
+        if compare_vertices(left_dart.vertices[0], right_dart.vertices[0]):
             return
         top_left_kite = Tile('kite')
         top_right_kite = Tile('kite')
@@ -250,6 +314,7 @@ def queen(vertex_components, vertex_values, dictionary, list_tiles):
             if not check_if_tile_exists(top_left_kite, vertex_values):
                 list_tiles.append(top_left_kite)
                 update_dictionary(dictionary, top_left_kite)
+            return True
     if vertex_components.count(('kite', 1)) + vertex_components.count(('kite', 3)) == 3:
         if vertex_components.count(('kite', 1)) == 2:
             v1_kite1, v1_kite2, v3_kite3 = None, None, None
@@ -265,7 +330,7 @@ def queen(vertex_components, vertex_values, dictionary, list_tiles):
             temp_kite = Tile('kite')
             new_dart = Tile('dart')
             new_kite = Tile('kite')
-            if v3_kite3.vertices[2] == v1_kite1.vertices[2] or v3_kite3.vertices[2] == v1_kite2.vertices[2]:
+            if compare_vertices(v3_kite3.vertices[2], v1_kite1.vertices[2]) or compare_vertices(v3_kite3.vertices[2], v1_kite2.vertices[2]):
                 # top left
                 temp_kite.draw_kite(v3_kite3, 'top-left')
                 new_dart.draw_dart(temp_kite, 'bottom-right')
@@ -297,7 +362,7 @@ def queen(vertex_components, vertex_values, dictionary, list_tiles):
             temp_kite = Tile('kite')
             new_dart = Tile('dart')
             new_kite = Tile('kite')
-            if v1_kite3.vertices[2] == v3_kite1.vertices[2] or v1_kite3.vertices[2] == v3_kite2.vertices[2]:
+            if compare_vertices(v1_kite3.vertices[2], v3_kite1.vertices[2]) or compare_vertices(v1_kite3.vertices[2], v3_kite2.vertices[2]):
                 # top left
                 temp_kite.draw_kite(v1_kite3, 'top-right')
                 new_dart.draw_dart(temp_kite, 'bottom-left')
@@ -328,13 +393,13 @@ def prince(vertex_components, vertex_values, dictionary, list_tiles):
             dart, kite = vertex_values[1][0], vertex_values[0][0]
 
         new_kite = Tile('kite')
-        if dart.vertices[1] == kite.vertices[2]:
+        if compare_vertices(dart.vertices[1], kite.vertices[2]):
             new_kite.draw_kite(kite, 'top-left')
             if not check_if_tile_exists(new_kite, vertex_values):
                 list_tiles.append(new_kite)
                 update_dictionary(dictionary, new_kite)
                 return True
-        elif dart.vertices[3] == kite.vertices[2]:
+        elif compare_vertices(dart.vertices[3], kite.vertices[2]):
             new_kite.draw_kite(kite, 'top-right')
             if not check_if_tile_exists(new_kite, vertex_values):
                 list_tiles.append(new_kite)
@@ -409,11 +474,12 @@ def check_if_tile_exists(tile, dictionary_values):
 
 def update_dictionary(dictionary, new_tile):
     for index, vertex in enumerate(new_tile.vertices):
-        if dictionary.get(vertex) is None:
-            dictionary[vertex] = [(new_tile, index)]
+        vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
+        if dictionary.get(vertex_key) is None:
+            dictionary[vertex_key] = [(new_tile, index)]
         else:
-            if not (any(other_tiles == (new_tile, index) for other_tiles in dictionary[vertex])):
-                dictionary[vertex].append((new_tile, index))
+            if not (any(other_tiles == (new_tile, index) for other_tiles in dictionary[vertex_key])):
+                dictionary[vertex_key].append((new_tile, index))
 
 
 def remove_completed_vertices(dictionary):
@@ -432,3 +498,6 @@ def remove_completed_vertices(dictionary):
             elif sorted([('dart', 1), ('dart', 3), ('kite', 0), ('kite', 0)]) == sorted(bacon):
                 dictionary.pop(key, None)
 
+
+def compare_vertices(self, other):
+    return round(self[0], 4) == round(other[0], 4) and round(self[1], 4) == round(other[1], 4)

@@ -15,6 +15,7 @@ import math
 #
 # When I decrease the std_length, I need to increase n. Not exactly sure what the problem is.
 # Pairings: (n = 4, std_length = 25), (5, 17), (6, 12)
+
 def round_coordinates(coordinates, n=6):
     rounded = []
     for val in coordinates:
@@ -35,14 +36,15 @@ def truncate(value, n):
 
 
 def rotate_point(point_to_rotate, point_of_rotation, degrees_of_rotation):
+    precision = 10
     # Convert degrees to radians
     radians = (degrees_of_rotation * math.pi) / 180
 
     # Math: Translates Cartesian coordinates to polar, rotates, then maps back to Cartesian.
-    new_X = point_of_rotation[0] + (point_to_rotate[0] - point_of_rotation[0]) * math.cos(radians) - (
-            point_to_rotate[1] - point_of_rotation[1]) * math.sin(radians)
+    new_X = point_of_rotation[0] + (point_to_rotate[0] - point_of_rotation[0]) * round(math.cos(radians), precision) - (
+            point_to_rotate[1] - point_of_rotation[1]) * round(math.sin(radians), precision)
 
-    new_Y = point_of_rotation[1] + (point_to_rotate[0] - point_of_rotation[0]) * math.sin(radians) + (
-            point_to_rotate[1] - point_of_rotation[1]) * math.cos(radians)
+    new_Y = point_of_rotation[1] + (point_to_rotate[0] - point_of_rotation[0]) * round(math.sin(radians), precision) + (
+            point_to_rotate[1] - point_of_rotation[1]) * round(math.cos(radians), precision)
 
-    return new_X, new_Y
+    return round(round(new_X, precision+4), precision+2), round(round(new_Y, precision+4), precision+2)

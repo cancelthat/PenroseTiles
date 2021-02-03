@@ -17,77 +17,25 @@ def force_tiles(dictionary, list_of_all_tiles):
         print('Force stop; something may have gone wrong.')
         return
     total = dictionary.copy()
-    for key, value in total.items():
+    for key, value in sorted(total.items()):
         vertex_tiles = []
         for val in value:
             vertex_tiles.append((val[0].name, val[1]))  # (tile's name, tile's vertex contained in the key) ex. ('kite' ,0)
 
         vertex_tiles = sorted(vertex_tiles)
-
-        if queen(vertex_tiles, value, dictionary, list_of_all_tiles):
-            queen_tiles = []
-            for val in dictionary[key]:
-                queen_tiles.append(val[0])
-
-            for tile in queen_tiles:
-                for vertex in tile.vertices:
-                    vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
-                    if dictionary.get(vertex_key) is None:
-                        pass
-                    else:
-                        vertex_tiles = []
-                        for item in dictionary[vertex_key]:
-                            vertex_tiles.append((item[0].name, item[1]))
-
-                        ace(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-                        deuce(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-                        jack(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-            continue
-        if king(vertex_tiles, value, dictionary, list_of_all_tiles):
-            king_tiles = []
-            for val in dictionary[key]:
-                king_tiles.append(val[0])
-
-            for tile in king_tiles:
-                for vertex in tile.vertices:
-                    vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
-                    if dictionary.get(vertex_key) is None:
-                        pass
-                    else:
-                        vertex_tiles = []
-                        for item in dictionary[vertex_key]:
-                            vertex_tiles.append((item[0].name, item[1]))
-
-                        ace(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-                        deuce(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-                        jack(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-            continue
-        if jack(vertex_tiles, value, dictionary, list_of_all_tiles):
-            jack_tiles = []
-            for val in dictionary[key]:
-                jack_tiles.append(val[0])
-
-            for tile in jack_tiles:
-                for vertex in tile.vertices:
-                    vertex_key = (round(vertex[0], 4), round(vertex[1], 4))
-                    if dictionary.get(vertex_key) is None:
-                        pass
-                    else:
-                        vertex_tiles = []
-                        for item in dictionary[vertex_key]:
-                            vertex_tiles.append((item[0].name, item[1]))
-
-                        ace(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-                        deuce(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
-                        sun(vertex_tiles, dictionary[vertex_key], dictionary, list_of_all_tiles)
+        if ace(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue
         if prince(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if king(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if jack(vertex_tiles, value, dictionary, list_of_all_tiles):
+            continue
+        if queen(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue
         if star(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue
         if sun(vertex_tiles, value, dictionary, list_of_all_tiles):
-            continue
-        if ace(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue
         if deuce(vertex_tiles, value, dictionary, list_of_all_tiles):
             continue

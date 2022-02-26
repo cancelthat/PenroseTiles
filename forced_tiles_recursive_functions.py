@@ -18,8 +18,6 @@ def new_force(vertices, tiles):
     for edge_vertex in edge_vertices:
         if ace(edge_vertex, vertices, tiles):
             edge_vertex.name = 'ace'
-        elif sun(edge_vertex, vertices, tiles):
-            edge_vertex.name = 'sun'
         elif queen(edge_vertex, vertices, tiles):
             edge_vertex.name = 'queen'
         elif jack(edge_vertex, vertices, tiles):
@@ -30,6 +28,8 @@ def new_force(vertices, tiles):
             edge_vertex.name = 'king'
         elif star(edge_vertex, vertices, tiles):
             edge_vertex.name = 'star'
+        elif sun(edge_vertex, vertices, tiles):
+            edge_vertex.name = 'sun'
         elif prince(edge_vertex, vertices, tiles):
             pass
 
@@ -51,10 +51,7 @@ def ace(vertex, all_vertices, all_tiles):
         left_kite = Kite()
         left_kite.draw(dart, 'bottom-right')
 
-        for flag in update_tiles(all_tiles, [right_kite, left_kite]):
-            if flag:
-                update_vertices(all_vertices, [right_kite, left_kite])
-                update_congruency(vertex, [right_kite, left_kite])
+        update_tiles([right_kite, left_kite], all_tiles, all_vertices)
 
         return True
     return False
@@ -65,10 +62,7 @@ def sun(vertex, all_vertices, all_tiles):
         for val in vertex.congruent_vertices:
             new_tile = Kite()
             new_tile.draw(val[0], 'bottom-right')
-            for flag in update_tiles(all_tiles, new_tile):
-                if flag:
-                    update_vertices(all_vertices, new_tile)
-                    update_congruency(vertex, new_tile)
+            update_tiles(new_tile, all_tiles, all_vertices)
 
             if len(vertex.congruent_vertices) == 5:
                 return True
@@ -76,20 +70,13 @@ def sun(vertex, all_vertices, all_tiles):
         for val in vertex.congruent_vertices:
             tile_right = Kite()
             tile_right.draw(val[0], 'bottom-right')
-            for flag in update_tiles(all_tiles, tile_right):
-                if flag:
-                    update_vertices(all_vertices, tile_right)
-                    update_congruency(vertex, tile_right)
+            update_tiles(tile_right, all_tiles, all_vertices)
             if len(vertex.congruent_vertices) == 5:
                 return True
 
             tile_left = Kite()
             tile_left.draw(val[0], 'bottom-left')
-            for flag in update_tiles(all_tiles, tile_left):
-                if flag:
-                    update_vertices(all_vertices, tile_left)
-                    update_congruency(vertex, tile_left)
-
+            update_tiles(tile_left, all_tiles, all_vertices)
             if len(vertex.congruent_vertices) == 5:
                 return True
     return False
@@ -101,10 +88,7 @@ def star(vertex, all_vertices, all_tiles):
             new_tile = Dart()
             new_tile.draw(val[0], 'top-right')
 
-            for flag in update_tiles(all_tiles, new_tile):
-                if flag:
-                    update_vertices(all_vertices, new_tile)
-                    update_congruency(vertex, new_tile)
+            update_tiles(new_tile, all_tiles, all_vertices)
 
             if len(vertex.congruent_vertices) == 5:
                 return True
@@ -131,10 +115,7 @@ def deuce(vertex, all_vertices, all_tiles):
             new_left_dart.draw(k1, 'top-right')
             new_right_dart.draw(k2, 'top-left')
 
-        for flag in update_tiles(all_tiles, [new_left_dart, new_right_dart]):
-            if flag:
-                update_vertices(all_vertices, [new_left_dart, new_right_dart])
-                update_congruency(vertex, [new_left_dart, new_right_dart])
+        update_tiles([new_left_dart, new_right_dart], all_tiles, all_vertices)
         return True
     return False
 
@@ -152,9 +133,9 @@ def jack(vertex, all_vertices, all_tiles):
                 elif val[1] == 3:
                     right_dart = val[0]
 
-        # if the two darts are touch at vertex 0, then return (because a jack isn't possible)
+        # if the two darts are touching at vertex 0, then return (because a jack isn't possible)
         if compare_coord(left_dart.vertices[0], right_dart.vertices[0]):
-            return
+            return False
 
         top_left_kite = Kite()
         top_right_kite = Kite()
@@ -164,10 +145,7 @@ def jack(vertex, all_vertices, all_tiles):
         top_right_kite.draw(right_dart, 'top-left')
         bottom_kite.draw(left_dart, 'bottom-right')
 
-        for flag in update_tiles(all_tiles, [top_left_kite, top_right_kite, bottom_kite]):
-            if flag:
-                update_vertices(all_vertices, [top_left_kite, top_right_kite, bottom_kite])
-                update_congruency(vertex, [top_left_kite, top_right_kite, bottom_kite])
+        update_tiles([top_left_kite, top_right_kite, bottom_kite], all_tiles, all_vertices)
         return True
     elif congruent(vertex, [('kite', 2)]):
         if d1:
@@ -186,10 +164,7 @@ def jack(vertex, all_vertices, all_tiles):
             top_left_kite.draw(dart, 'top-right')
             top_right_kite.draw(top_left_kite, 'bottom-right')
 
-            for flag in update_tiles(all_tiles, [new_dart, top_left_kite, top_right_kite, bottom_kite]):
-                if flag:
-                    update_vertices(all_vertices, [new_dart, top_left_kite, top_right_kite, bottom_kite])
-                    update_congruency(vertex, [new_dart, top_left_kite, top_right_kite, bottom_kite])
+            update_tiles([new_dart, top_left_kite, top_right_kite, bottom_kite], all_tiles, all_vertices)
             return True
         elif d3:
             dart = None
@@ -207,10 +182,8 @@ def jack(vertex, all_vertices, all_tiles):
             bottom_kite.draw(dart, 'bottom-left')
             new_dart.draw(bottom_kite, 'top-left')
 
-            for flag in update_tiles(all_tiles, [new_dart, top_left_kite, top_right_kite, bottom_kite]):
-                if flag:
-                    update_vertices(all_vertices, [new_dart, top_left_kite, top_right_kite, bottom_kite])
-                    update_congruency(vertex, [new_dart, top_left_kite, top_right_kite, bottom_kite])
+            update_tiles([new_dart, top_left_kite, top_right_kite, bottom_kite], all_tiles, all_vertices)
+
             return True
     return False
 
@@ -236,10 +209,7 @@ def queen(vertex, all_vertices, all_tiles):
             top_left_kite.draw(k1, 'top-right')
             top_right_kite.draw(k3, 'top-left')
 
-            for flag in update_tiles(all_tiles, [top_left_kite, top_right_kite]):
-                if flag:
-                    update_vertices(all_vertices, [top_left_kite, top_right_kite])
-                    update_congruency(vertex, [top_left_kite, top_right_kite])
+            update_tiles([top_left_kite, top_right_kite], all_tiles, all_vertices)
             return True
     if congruent(vertex, [('kite', 1), ('kite', 1), ('kite', 3)]):
         k1_a, k1_b, k3 = None, None, None
@@ -266,10 +236,7 @@ def queen(vertex, all_vertices, all_tiles):
             temp_kite.draw(new_dart, 'top-left')
             new_kite.draw(temp_kite, 'top-right')
 
-        for flag in update_tiles(all_tiles, [new_dart, new_kite]):
-            if flag:
-                update_vertices(all_vertices, [new_dart, new_kite])
-                update_congruency(vertex, [new_dart, new_kite])
+        update_tiles([new_dart, new_kite], all_tiles, all_vertices)
         return True
     elif congruent(vertex, [('kite', 1), ('kite', 3), ('kite', 3)]):
         k3_a, k3_b, k1 = None, None, None
@@ -296,9 +263,8 @@ def queen(vertex, all_vertices, all_tiles):
             temp_kite.draw(new_dart, 'top-right')
             new_kite.draw(temp_kite, 'top-left')
 
-        for flag in update_tiles(all_tiles, [new_dart, new_kite]):
-            update_vertices(all_vertices, [new_dart, new_kite])
-            update_congruency(vertex, [new_dart, new_kite])
+        update_tiles([new_dart, new_kite], all_tiles, all_vertices)
+
         return True
     return False
 
@@ -325,11 +291,7 @@ def king(vertex, all_vertices, all_tiles):
             dart2.draw(dart1, 'top-right')
             dart3.draw(dart2, 'top-right')
 
-            for flag in update_tiles(all_tiles, [kite, dart1, dart2, dart3]):
-                if flag:
-                    update_vertices(all_vertices, [kite, dart1, dart2, dart3])
-                    update_congruency(vertex, [kite, dart1, dart2, dart3])
-
+            update_tiles([kite, dart1, dart2, dart3], all_tiles, all_vertices)
         else:
             kite = Kite()
             dart1, dart2, dart3 = Dart(), Dart(), Dart()
@@ -339,10 +301,7 @@ def king(vertex, all_vertices, all_tiles):
             dart2.draw(dart1, 'top-left')
             dart3.draw(dart2, 'top-left')
 
-            for flag in update_tiles(all_tiles, [kite, dart1, dart2, dart3]):
-                if flag:
-                    update_vertices(all_vertices, [kite, dart1, dart2, dart3])
-                    update_congruency(vertex, [kite, dart1, dart2, dart3])
+            update_tiles([kite, dart1, dart2, dart3], all_tiles, all_vertices)
         return True
     return False
 
@@ -366,15 +325,11 @@ def prince(vertex, all_vertices, all_tiles):
         new_kite = Kite()
         if compare_coord(dart.vertices[1], kite.vertices[2]):
             new_kite.draw(kite, 'top-left')
-            for flag in update_tiles(all_tiles, new_kite):
-                update_vertices(all_vertices, new_kite)
-                update_congruency(vertex, new_kite)
+            update_tiles(new_kite, all_tiles, all_vertices)
             return True
         elif compare_coord(dart.vertices[3], kite.vertices[2]):
             new_kite.draw(kite, 'top-right')
-            for flag in update_tiles(all_tiles, new_kite):
-                update_vertices(all_vertices, new_kite)
-                update_congruency(vertex, new_kite)
+            update_tiles(new_kite, all_tiles, all_vertices)
             return True
     return False
 
@@ -410,7 +365,7 @@ def compare_coord(first, other):
 
 # Function: 4 tile vertices loop through all vertices comparing coordinates
 # Run Time: O(n): 4n
-def update_vertices(vertices, tiles):
+def update_vertices(tiles, vertices):
     t = []
     if isinstance(tiles, list):
         t = tiles
@@ -452,7 +407,7 @@ def update_congruency(vertex, tiles):
 # Function: loops through all_tiles, comparing tiles; tile __eq__ has 2 comparisons. If the tile does not exist, the
 # function will loop through all of the tiles.
 # Run Time: O(n)
-def update_tiles(all_tiles, tiles):
+def update_tiles(tiles, all_tiles, all_vertices):
     # update the list of all tiles
     if isinstance(tiles, list):
         flags = []
@@ -464,11 +419,13 @@ def update_tiles(all_tiles, tiles):
                     flags.append(False)
                     break
             if flag:
+                update_vertices(t, all_vertices)
                 all_tiles.append(t)
                 flags.append(True)
         return flags
     else:
         if not (tiles in all_tiles):
             all_tiles.append(tiles)
-            return [True]
-        return [False]
+            update_vertices(tiles, all_vertices)
+            return True
+        return False

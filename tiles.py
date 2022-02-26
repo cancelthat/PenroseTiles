@@ -14,7 +14,7 @@ class Tile:
         self.name = name
         self.vertices = vertices
         self.tile_id = tile_id
-        self.color = (random.randint(10, 255), random.randint(10, 255), random.randint(10, 255))
+        self.color = (random.randint(15, 200), random.randint(15, 255), random.randint(15, 255))
         self.center = None
 
     def __eq__(self, other):
@@ -65,14 +65,14 @@ class Tile:
 
         self.center = self.round_coordinates((x, y))
 
-    def round_vertices(self, n=5):
+    def round_vertices(self, n=6):
         new_vertices = []
         for vertex in self.vertices:
             new_vertices.append(self.round_coordinates(vertex, n))
         self.vertices = new_vertices
 
     @staticmethod
-    def round_coordinates(coordinates, n=5):
+    def round_coordinates(coordinates, n=6):
         return round(coordinates[0], n), round(coordinates[1], n)
 
     @staticmethod

@@ -1,8 +1,8 @@
 from kite import Kite
-from dart import Dart
 
 
 class Vertex:
+    # change coordinates to a 2d list, rather a tuple
     def __init__(self, tile_to_add, coordinates, name='edge'):
         self.tiles = [tile_to_add]
         self.coordinates = coordinates
@@ -15,10 +15,8 @@ class Vertex:
                 self.congruent_vertices.append((tile_to_add, i))
 
     def __eq__(self, other):
-        a = self.coordinates
-        b = other.coordinates
-        value = (a[0]/b[0]) * (a[1]/b[1])
-        if 0.99 < value < 1.01:
+        value = (self.coordinates[0] - other.coordinates[0]) + (self.coordinates[1] - other.coordinates[1])
+        if abs(value) < 0.001:
             return True
         return False
 

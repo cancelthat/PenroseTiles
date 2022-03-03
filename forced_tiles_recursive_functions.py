@@ -5,8 +5,8 @@ from vertex import Vertex
 
 def new_force(vertices, tiles):
 
-    vertices_len = len(vertices)
-    if vertices_len > 5000:
+    tiles_len = len(tiles)
+    if tiles_len > 5000:
         print('5000 vertex limit reached')
         return
 
@@ -18,22 +18,30 @@ def new_force(vertices, tiles):
     for edge_vertex in edge_vertices:
         if ace(edge_vertex, vertices, tiles):
             edge_vertex.name = 'ace'
-        elif queen(edge_vertex, vertices, tiles):
+            continue
+        if queen(edge_vertex, vertices, tiles):
             edge_vertex.name = 'queen'
-        elif jack(edge_vertex, vertices, tiles):
+            continue
+        if jack(edge_vertex, vertices, tiles):
             edge_vertex.name = 'jack'
-        elif deuce(edge_vertex, vertices, tiles):
+            continue
+        if deuce(edge_vertex, vertices, tiles):
             edge_vertex.name = 'deuce'
-        elif king(edge_vertex, vertices, tiles):
+            continue
+        if king(edge_vertex, vertices, tiles):
             edge_vertex.name = 'king'
-        elif star(edge_vertex, vertices, tiles):
+            continue
+        if star(edge_vertex, vertices, tiles):
             edge_vertex.name = 'star'
-        elif sun(edge_vertex, vertices, tiles):
+            continue
+        if sun(edge_vertex, vertices, tiles):
             edge_vertex.name = 'sun'
-        elif prince(edge_vertex, vertices, tiles):
-            pass
+            continue
+        if prince(edge_vertex, vertices, tiles):
+            continue
+        pass
 
-    if vertices_len != len(vertices):
+    if tiles_len != len(tiles):
         new_force(vertices, tiles)
 
 
@@ -189,7 +197,7 @@ def jack(vertex, all_vertices, all_tiles):
 
 
 def queen(vertex, all_vertices, all_tiles):
-    # the second part says: if only 1 (Dart, 0) exist in the congruent vertices
+    # the second part says: if only a single (Dart, 0) exist in the congruent vertices
     if congruent(vertex, [('dart', 0), ('kite', 1), ('kite', 3)]) and not congruent(vertex, [('dart', 0), ('dart', 0)]):
 
         dart, k1, k3 = None, None, None
@@ -270,7 +278,7 @@ def queen(vertex, all_vertices, all_tiles):
 
 
 def king(vertex, all_vertices, all_tiles):
-    # if two (Dart, 2) and at least one (Kite, 1) or (Kite, 3) exist
+    # if two (Dart, 0) and at least one (Kite, 1) or (Kite, 3) exist
     if congruent(vertex, [('dart', 0), ('dart', 0)]) and (congruent(vertex, [('kite', 1)]) or congruent(vertex, [('kite', 3)])):
         k1, k3 = None, None
         # only 1 kite is need, the rest of the tiles will be drawn and checked

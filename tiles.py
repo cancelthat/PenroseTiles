@@ -6,14 +6,13 @@ PHI = (1 + math.sqrt(5)) / 2
 
 class Tile:
 
-    # The vertices property is ordered, meaning the vertex's index correlates to a tile vertex.
+    # The vertices value is ordered, meaning the vertex's index correlates to the tile's vertex.
     # For the dart, going in a clock-wise direction, the point or nose of the dart would be v0.
     # For the kite, imagine it's an actual kite you would fly and you were holding it upright. The kite of the kite is
     # v0 and the rest are followed in a clock-wise direction.
-    def __init__(self, name, vertices=None, tile_id=-1):
+    def __init__(self, name, vertices=None):
         self.name = name
         self.vertices = vertices
-        self.tile_id = tile_id
         self.color = (random.randint(15, 200), random.randint(15, 255), random.randint(15, 255))
         self.center = None
 
@@ -25,6 +24,12 @@ class Tile:
         if abs(value) < 0.001:
             return True
         return False
+
+    def __lt__(self, other):
+        center = (400, 375)
+        a = math.sqrt(pow(self.center[0] - center[0], 2) + pow(self.center[1] - center[1], 2))
+        b = math.sqrt(pow(other.center[0] - center[0], 2) + pow(other.center[1] - center[1], 2))
+        return a < b
 
     def initial_shape(self, coordinates, unit_length):
         v0, v1, v2, v3 = coordinates, (0, 0), (0, 0), (0, 0)
@@ -70,6 +75,11 @@ class Tile:
         for vertex in self.vertices:
             new_vertices.append(self.round_coordinates(vertex, n))
         self.vertices = new_vertices
+        self.calculate_center()
+
+    def set_vertices(self, vertex_list):
+        self.vertices = vertex_list
+        self.round_vertices()
 
     @staticmethod
     def round_coordinates(coordinates, n=6):
@@ -91,21 +101,6 @@ class Tile:
                         point_to_rotate[1] - point_of_rotation[1]) * round(math.cos(radians), precision)
 
         return round(round(new_x, precision + 4), precision + 2), round(round(new_y, precision + 4), precision + 2)
-
-# ***** The Rounding Problem *****
-# The recursive algorithm stops because there is a slight rounding error. When n is large, there is a high chance
-# of the algorithm stopping, because the vertices will not match. When n is too small, the tiles do not align properly
-# but has a less chance of stopping the recursion.
-# The program seems to have minimal breaks when n=2 or n=3.
-#
-# Truncating the values causes the program to go erratic and place tiles in the wrong direction or not at all. However,
-# I do feel that truncating the values may produce a better end result but will require a lot more debugging.
-# Furthermore, I have found that when changing the std_len, or the tile's size, the program experiences many more
-# rounding errors which causes new tiles to be placed on top of already existing tiles or not placed at all.
-# Therefore the optimal values I have found are: n=3 and std_length=50
-#
-# When I decrease the std_length, I need to increase n. Not exactly sure what the problem is.
-# Pairings: (n = 4, std_length = 25), (5, 17), (6, 12)
 
 
 def rotate(angle, trig_function):

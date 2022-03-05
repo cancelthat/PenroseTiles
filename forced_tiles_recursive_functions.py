@@ -1,14 +1,10 @@
-from kite import Kite
-from dart import Dart
+from kite import Kite, Dart
 from vertex import Vertex
 
 
 def new_force(vertices, tiles):
 
     tiles_len = len(tiles)
-    if tiles_len > 5000:
-        print('5000 vertex limit reached')
-        return
 
     edge_vertices = []
     for vertex in vertices:
@@ -39,7 +35,6 @@ def new_force(vertices, tiles):
             continue
         if prince(edge_vertex, vertices, tiles):
             continue
-        pass
 
     if tiles_len != len(tiles):
         new_force(vertices, tiles)
@@ -363,13 +358,15 @@ def congruent(vertex=None, subset=None):
     return False
 
 
-# 3 arithmetic, 1 comparison
+# Because of the floating point rounding error, coordinates need to be compared with a tolerance.
 def compare_coord(first, other):
     value = (first[0] - other[0]) + (first[1] - other[1])
     if abs(value) < 0.001:
         return True
     return False
 
+
+# Run time for all update functions: O(n^2), where n is len(all_tiles)
 
 # Function: 4 tile vertices loop through all vertices comparing coordinates
 # Run Time: O(n): 4n
@@ -413,27 +410,22 @@ def update_congruency(vertex, tiles):
 
 
 # Function: loops through all_tiles, comparing tiles; tile __eq__ has 2 comparisons. If the tile does not exist, the
-# function will loop through all of the tiles.
+# function will traverse all_tiles.
 # Run Time: O(n)
 def update_tiles(tiles, all_tiles, all_vertices):
     # update the list of all tiles
     if isinstance(tiles, list):
-        flags = []
         for t in tiles:
             flag = 1
             for s in all_tiles:
                 if s == t:
                     flag = 0
-                    flags.append(False)
                     break
             if flag:
                 update_vertices(t, all_vertices)
                 all_tiles.append(t)
-                flags.append(True)
-        return flags
+
     else:
         if not (tiles in all_tiles):
             all_tiles.append(tiles)
             update_vertices(tiles, all_vertices)
-            return True
-        return False

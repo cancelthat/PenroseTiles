@@ -1,16 +1,4 @@
-import math
 from tiles import Tile
-
-
-# How drawing kites and darts works.
-# The function is given an existing tile. For example lets say we are given a dart with its orientation upward; ^.
-# And let's say we want to draw another dart adjacent to the given dart. We know that these two darts will have one
-# identical edge (fully spacial structure), and therefore have two identical vertices. Now we only need the other
-# two vertices. Those points are calculated by taking an existing vertex from the given tile and rotating it around
-# another vertex from the given tile.
-# I find this method to be the simplest since all angles are multiples of 36 and I don't have to use the golden
-# ratio in the calculations.
-# Because there are only 14 total possibility I've decided to exhaust them all with If statements.
 
 
 class Dart(Tile):

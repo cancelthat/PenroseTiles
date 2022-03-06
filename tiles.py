@@ -1,8 +1,6 @@
 import math
 import random
 
-PHI = (1 + math.sqrt(5)) / 2
-
 
 class Tile:
 
@@ -29,11 +27,12 @@ class Tile:
         center = (400, 375)
         a = math.sqrt(pow(self.center[0] - center[0], 2) + pow(self.center[1] - center[1], 2))
         b = math.sqrt(pow(other.center[0] - center[0], 2) + pow(other.center[1] - center[1], 2))
-        return a < b
+        return a < b and self.color < other.color
 
     def initial_shape(self, coordinates, unit_length):
         v0, v1, v2, v3 = coordinates, (0, 0), (0, 0), (0, 0)
         x, y = coordinates
+        PHI = (1 + math.sqrt(5)) / 2
 
         if self.name == 'dart':
             v1 = ((-1 * PHI * unit_length * rotate(54, 'cos')) + x, (-1 * PHI * unit_length * rotate(54, 'sin')) + y)
@@ -87,20 +86,16 @@ class Tile:
 
     @staticmethod
     def rotate_point(point_to_rotate, point_of_rotation, degrees_of_rotation):
-        precision = 10
-        # Convert degrees to radians
         radians = (degrees_of_rotation * math.pi) / 180
 
         # Math: Translates Cartesian coordinates to polar, rotates, then maps back to Cartesian.
-        new_x = point_of_rotation[0] + (point_to_rotate[0] - point_of_rotation[0]) * round(math.cos(radians),
-                                                                                           precision) - (
-                        point_to_rotate[1] - point_of_rotation[1]) * round(math.sin(radians), precision)
+        new_x = point_of_rotation[0] + (point_to_rotate[0] - point_of_rotation[0]) * \
+                math.cos(radians) - (point_to_rotate[1] - point_of_rotation[1]) * math.sin(radians)
 
-        new_y = point_of_rotation[1] + (point_to_rotate[0] - point_of_rotation[0]) * round(math.sin(radians),
-                                                                                           precision) + (
-                        point_to_rotate[1] - point_of_rotation[1]) * round(math.cos(radians), precision)
+        new_y = point_of_rotation[1] + (point_to_rotate[0] - point_of_rotation[0]) * \
+                math.sin(radians) + (point_to_rotate[1] - point_of_rotation[1]) * math.cos(radians)
 
-        return round(round(new_x, precision + 4), precision + 2), round(round(new_y, precision + 4), precision + 2)
+        return new_x, new_y
 
 
 def rotate(angle, trig_function):
@@ -109,4 +104,4 @@ def rotate(angle, trig_function):
     elif trig_function == 'sin':
         return round(math.sin(angle * (math.pi / 180)), 10)
     else:
-        print('trig function ', trig_function, ' not found.')
+        print('trig function \'', trig_function, '\' not found.')

@@ -1,6 +1,3 @@
-
-# Both Kite and Dart classes are defined here because I needed to reference each of them in the deflate methods
-
 from tiles import Tile
 
 

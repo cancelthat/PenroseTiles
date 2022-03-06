@@ -2,9 +2,9 @@ import pygame
 import math
 import time
 
-from kite import Kite, Dart
+from kites_and_darts import Kite, Dart
 from vertex import Vertex
-from forced_tiles_recursive_functions import new_force, update_vertices, update_tiles, compare_coord
+from forced_tiles_recursive_functions import force_tiles, update_vertices, update_tiles, compare_coord
 
 # Initializer
 pygame.init()
@@ -12,6 +12,7 @@ pygame.init()
 # Adjustable Variables
 initial_tile = Kite()
 UNIT_LENGTH = 20
+displacement_amount = 10
 
 # Display Dimensions
 DISPLAY_WIDTH = 800
@@ -26,10 +27,10 @@ pygame.display.set_icon(icon)
 # Switches
 game_is_running = True
 kite_is_selected = True
-dark_mode = False
-build_animation = False
+wire_frame_active = False
+build_animation_active = False
 high_lighter_active = False
-full_force_active = False
+prince_vertex_active = False
 
 # Information Holders
 all_tiles = []
@@ -39,12 +40,15 @@ tiles_generated = 1
 
 # random note: Kings, stars, and sun don't overlap
 
-# ----- to-do -----
+# ------------------ to-do ------------------
 # Clean up find_closest_tile functions
 # Make the prince vertex optional
 # The Vertex class has a 'tiles' attribute that I don't think I use; get rid of it.
 # Do some renaming
 # remap keys
+# get rid of bacon and eggs for tile building name
+# switch force_tiles(vertices, tiles) to force_tiles(tiles, vertices)
+# restructure the build animation loops
 
 
 def show_stats(amount):
@@ -67,53 +71,31 @@ def distance_formula(val1, val2):
     return round(math.sqrt(pow(val1[0] - val2[0], 2) + pow(val1[1] - val2[1], 2)), 4)
 
 
-def distance_from_tile_to_point(given_tile, point):
-    total = 0
-    for vert in given_tile.vertices:
-        total += distance_formula(vert, point)
-    return total
-
-
-def find_closest_tile(tiles, point):
-    shortest_distance = math.inf
+def create_new_tile(tiles):
+    # First, find the closest tile to the mouse
+    mouse_position = pygame.mouse.get_pos()
     closest_tile = None
+    shortest_distance = math.inf
     for t in tiles:
-        dist = distance_from_tile_to_point(t, point)
+        dist = distance_formula(t.center, mouse_position)
         if dist < shortest_distance:
             shortest_distance = dist
             closest_tile = t
-    return closest_tile
 
-
-def find_closest_vertex(given_tile, point):
-    v0, v1, v2, v3 = given_tile.vertices
-
+    # Then get the created tile's orientation relative to the closest tile
+    v0, v1, v2, v3 = closest_tile.vertices
     vertical = 'top'
     horizontal = 'right'
-    if distance_formula(v1, point) >= distance_formula(v3, point):
+    if distance_formula(v1, mouse_position) >= distance_formula(v3, mouse_position):
         horizontal = 'left'
-    if distance_formula(v0, point) >= distance_formula(v2, point):
+    if distance_formula(v0, mouse_position) >= distance_formula(v2, mouse_position):
         vertical = 'bottom'
-    return vertical + '-' + horizontal
+    direction = vertical + '-' + horizontal
 
-
-def create_new_tile(tiles, click):
-    mouse_position = pygame.mouse.get_pos()
-    closest_tile = find_closest_tile(tiles, mouse_position)
-    direction = find_closest_vertex(closest_tile, mouse_position)
-
-    if click == 1:
-        if kite_is_selected:
-            new_tile = Kite()
-        else:
-            new_tile = Dart()
-    elif click == 3:
-        new_tile = Dart()
+    if kite_is_selected:
+        new_tile = Kite()
     else:
-        if kite_is_selected:
-            new_tile = Kite()
-        else:
-            new_tile = Dart()
+        new_tile = Dart()
 
     new_tile.draw(closest_tile, direction)
 
@@ -134,10 +116,6 @@ def deflate_tiles(tiles_to_deflate):
 
 
 def inflate_tiles(vertices):
-    # I think i have to inflate all tiles and then check for duplicates
-    # If I want to make inflation a method of the Vertex class, then I would need to make class objects for each of the
-    # royal vertices to make it robust.
-
     new_vertices = []
     new_tiles = []
 
@@ -194,7 +172,20 @@ def inflate_tiles(vertices):
     return new_tiles, new_vertices
 
 
-#
+def move_tiles(tiles, displacement):
+
+    new_vertices = []
+    new_tiles = []
+    for t in tiles:
+        displaced_vertices = []
+        for vert in t.vertices:
+            new_vertex = (vert[0] + displacement[0], vert[1] + displacement[1])
+            displaced_vertices.append(new_vertex)
+        t.set_vertices(displaced_vertices)
+        update_tiles(t, new_tiles, new_vertices)
+    return new_vertices
+
+
 # -------------- Pre-Game Initialization ----------------
 #
 initial_tile.initial_shape((DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), unit_length=UNIT_LENGTH)
@@ -202,9 +193,7 @@ all_tiles.append(initial_tile)
 for vertex_coordinates in initial_tile.vertices:
     all_vertices.append(Vertex(initial_tile, vertex_coordinates))
 #
-# -------------- Game Loop ----------------
-#
-mouse_moved = [0, 0]
+# --------------------- Game Loop -----------------------
 while game_is_running:
 
     # Background color
@@ -212,134 +201,178 @@ while game_is_running:
 
     # Event handler
     for event in pygame.event.get():
-        # Exit
+
+        # Exit program
         if event.type == pygame.QUIT:
             game_is_running = False
 
+        # This creates the highlighted tile for user visuals
         if event.type == pygame.MOUSEMOTION:
             temp_tile = []
-            created_tile = create_new_tile(all_tiles, event.buttons)
+            created_tile = create_new_tile(all_tiles)
             if high_lighter_active:
                 temp_tile.append(created_tile)
+
+        # Places a new tile where the user left clicks
         if event.type == pygame.MOUSEBUTTONUP:
+            # Right mouse button click
             if event.button == 1:
-                created_tile = create_new_tile(all_tiles, event.button)
+                created_tile = create_new_tile(all_tiles)
                 if created_tile is None:
                     print('tile already exists')
                 else:
-
                     start = time.time()
-                    edge_vertices = []
-                    for vertex in all_vertices:
-                        if vertex.name == 'edge':
-                            edge_vertices.append(vertex)
 
                     all_tiles.append(created_tile)
                     update_vertices(created_tile, all_vertices)
-                    new_force(all_vertices, all_tiles)
+                    force_tiles(all_vertices, all_tiles)
+
                     end = time.time()
                     print('build time: ', round(end - start, 4), 'sec')
                     tiles_generated = show_stats(tiles_generated)
+
+        # Key press event handlers
         if event.type == pygame.KEYUP:
+
+            # ---------- change tile type ------------
             if event.key == pygame.K_SPACE:
                 print('Next shape: dart') if kite_is_selected else print('Next shape: kite')
                 kite_is_selected = not kite_is_selected
-            elif event.key == pygame.K_k:  # wire-frame
-                dark_mode = not dark_mode
-            elif event.key == pygame.K_t:
+
+            # ---------- wire frame mode ------------
+            elif event.key == pygame.K_c:
+                wire_frame_active = not wire_frame_active
+
+            # ------------- debug ---------------
+            elif event.key == pygame.K_t:  # rerun force_tiles
                 print('debug')
-                new_force(all_vertices, all_tiles)
-            elif event.key == pygame.K_q:
+                force_tiles(all_vertices, all_tiles)
+
+            # ---------- quit ------------
+            elif event.key == pygame.K_ESCAPE:
                 game_is_running = False
-            elif event.key == pygame.K_l:  # new random colors
+
+            # ------------- assign new colors ---------------
+            elif event.key == pygame.K_e:
                 for tile in all_tiles:
                     tile.set_random_color()
-            elif event.key == pygame.K_r:  # reset
+            elif event.key == pygame.K_q:
+                for tile in all_tiles:
+                    tile.color = (0, 0, 0)
+
+            # ------------- reset ---------------
+            elif event.key == pygame.K_r:
+                initial_tile.initial_shape((DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), unit_length=UNIT_LENGTH)
                 all_tiles = [initial_tile]
                 all_vertices = []
                 update_vertices(initial_tile, all_vertices)
-            elif event.key == pygame.K_b:  # build animation
-                build_animation = True
-            elif event.key == pygame.K_h:
+
+            # ------------- build animation ---------------
+            elif event.key == pygame.K_b:
+                build_animation_active = True
+
+            # ------------- highlighter tile ---------------
+            elif event.key == pygame.K_f:
                 high_lighter_active = not high_lighter_active
-            elif event.key == pygame.K_d:  # deflate
-                print('deflating')
-                all_tiles, all_vertices = deflate_tiles(all_tiles)
-                new_force(all_vertices, all_tiles)
-                tiles_generated = show_stats(tiles_generated)
-            elif event.key == pygame.K_f:  # inflate
+
+            # ------------- inflate ---------------
+            elif event.key == pygame.K_x:  # inflate
                 print('inflating')
                 returned_tiles, returned_vertices = inflate_tiles(all_vertices)
                 if returned_tiles:
                     all_tiles = returned_tiles
                     all_vertices = returned_vertices
-                    new_force(all_vertices, all_tiles)
+                    force_tiles(all_vertices, all_tiles)
                     tiles_generated = show_stats(tiles_generated)
                 else:
                     print('can\'t inflate')
-            elif event.key == pygame.K_c:  # color current tiles
-                for tile in all_tiles:
-                    tile.set_random_color()
-            elif event.key == pygame.K_w:  # color current tiles
-                for tile in all_tiles:
-                    tile.color = (0, 0, 0)
-            elif event.key == pygame.K_1:  # color current tiles
-                for vertex in all_vertices:
-                    if vertex.name == 'deuce':
-                        for val in vertex.congruent_vertices:
-                            fail = val[0]
-                            fail.set_random_color()
-            elif event.key == pygame.K_2:  # color current tiles
+
+            # ------------- deflate ---------------
+            elif event.key == pygame.K_z:  # deflate
+                print('deflating')
+                all_tiles, all_vertices = deflate_tiles(all_tiles)
+                force_tiles(all_vertices, all_tiles)
+                tiles_generated = show_stats(tiles_generated)
+
+            # ------------- move tiles ---------------
+            elif event.key == pygame.K_w:
+                all_vertices = move_tiles(all_tiles, (0, -displacement_amount))
+                force_tiles(all_vertices, all_tiles)
+            elif event.key == pygame.K_s:
+                all_vertices = move_tiles(all_tiles, (0, displacement_amount))
+                force_tiles(all_vertices, all_tiles)
+            elif event.key == pygame.K_a:
+                all_vertices = move_tiles(all_tiles, (-displacement_amount, 0))
+                force_tiles(all_vertices, all_tiles)
+            elif event.key == pygame.K_d:
+                all_vertices = move_tiles(all_tiles, (displacement_amount, 0))
+                force_tiles(all_vertices, all_tiles)
+
+            # ------------- recolor vertices ---------------
+            elif event.key == pygame.K_1:
                 for vertex in all_vertices:
                     if vertex.name == 'sun':
                         for val in vertex.congruent_vertices:
                             fail = val[0]
                             fail.set_random_color()
-            elif event.key == pygame.K_3:  # color current tiles
+            elif event.key == pygame.K_2:
+                for vertex in all_vertices:
+                    if vertex.name == 'star':
+                        for val in vertex.congruent_vertices:
+                            fail = val[0]
+                            fail.set_random_color()
+            elif event.key == pygame.K_3:
+                for vertex in all_vertices:
+                    if vertex.name == 'deuce':
+                        for val in vertex.congruent_vertices:
+                            fail = val[0]
+                            fail.set_random_color()
+            elif event.key == pygame.K_4:
                 for vertex in all_vertices:
                     if vertex.name == 'jack':
                         for val in vertex.congruent_vertices:
                             fail = val[0]
                             fail.set_random_color()
-            elif event.key == pygame.K_4:  # color current tiles
+            elif event.key == pygame.K_5:
                 for vertex in all_vertices:
                     if vertex.name == 'queen':
                         for val in vertex.congruent_vertices:
                             fail = val[0]
                             fail.set_random_color()
-            elif event.key == pygame.K_5:  # color current tiles
+            elif event.key == pygame.K_6:
                 for vertex in all_vertices:
                     if vertex.name == 'king':
                         for val in vertex.congruent_vertices:
                             fail = val[0]
                             fail.set_random_color()
 
-        if build_animation:
+        if build_animation_active:
             temps = all_tiles.copy()
             temps.sort()
             for bacon in range(1, len(temps) + 1):
                 for index, eggs in enumerate(temps[:bacon]):
-                    if dark_mode:
-                        pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=0)
-                    else:
+                    if wire_frame_active:
                         pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=2)
+                    else:
+                        pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=0)
                 pygame.display.update()
 
                 build_time = 35
                 if build_time == 0:
                     build_time = 1
                 pygame.time.wait(build_time)
-            build_animation = False
-        elif dark_mode:
+            build_animation_active = False
+        elif wire_frame_active:
             for index, eggs in enumerate(all_tiles):
-                pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=0)
-
+                pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=2)
+                # pygame.draw.circle(DISPLAY, (0, 0, 200), center=eggs.center, radius=3)
                 if temp_tile:
                     if temp_tile[0] is not None:
                         pygame.draw.polygon(DISPLAY, (255, 255, 255), temp_tile[0].vertices, width=0)
         else:
             for index, eggs in enumerate(all_tiles):
-                pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=2)
+                pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=0)
+
             if temp_tile:
                 if temp_tile[0] is not None:
                     pygame.draw.polygon(DISPLAY, (255, 255, 255), temp_tile[0].vertices, width=2)

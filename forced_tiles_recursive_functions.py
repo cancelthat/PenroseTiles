@@ -1,8 +1,8 @@
-from kite import Kite, Dart
+from kites_and_darts import Kite, Dart
 from vertex import Vertex
 
 
-def new_force(vertices, tiles):
+def force_tiles(vertices, tiles):
 
     tiles_len = len(tiles)
 
@@ -37,7 +37,7 @@ def new_force(vertices, tiles):
             continue
 
     if tiles_len != len(tiles):
-        new_force(vertices, tiles)
+        force_tiles(vertices, tiles)
 
 
 def ace(vertex, all_vertices, all_tiles):

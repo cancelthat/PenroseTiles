@@ -15,11 +15,11 @@ def force_tiles(vertices, tiles):
         if ace(edge_vertex, vertices, tiles):
             edge_vertex.name = 'ace'
             continue
-        if queen(edge_vertex, vertices, tiles):
-            edge_vertex.name = 'queen'
-            continue
         if jack(edge_vertex, vertices, tiles):
             edge_vertex.name = 'jack'
+            continue
+        if queen(edge_vertex, vertices, tiles):
+            edge_vertex.name = 'queen'
             continue
         if deuce(edge_vertex, vertices, tiles):
             edge_vertex.name = 'deuce'
@@ -336,6 +336,8 @@ def prince(vertex, all_vertices, all_tiles):
             return True
     return False
 
+
+# ------------------ Helper functions ------------------
 
 # Checks if a vertex contains the values. The values being the congruent vertices of the form, ex. (Dart(), 1). A tuple
 # with the first element being a Tile and the second element representing the Tile's vertex number.

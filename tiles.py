@@ -35,13 +35,17 @@ class Tile:
         PHI = (1 + math.sqrt(5)) / 2
 
         if self.name == 'dart':
-            v1 = ((-1 * PHI * unit_length * rotate(54, 'cos')) + x, (-1 * PHI * unit_length * rotate(54, 'sin')) + y)
+            v1 = ((-1 * PHI * unit_length * self.rotate(54, 'cos')) + x,
+                  (-1 * PHI * unit_length * self.rotate(54, 'sin')) + y)
             v2 = (x, y - unit_length)
-            v3 = ((PHI * unit_length * rotate(54, 'cos')) + x, (-1 * PHI * unit_length * rotate(54, 'sin') + y))
+            v3 = ((PHI * unit_length * self.rotate(54, 'cos')) + x,
+                  (-1 * PHI * unit_length * self.rotate(54, 'sin') + y))
         else:
-            v3 = ((unit_length * rotate(18, 'cos')) + x, (-1 * unit_length * rotate(18, 'sin') + y))
+            v3 = ((unit_length * self.rotate(18, 'cos')) + x,
+                  (-1 * unit_length * self.rotate(18, 'sin') + y))
             v2 = (x, y - unit_length * PHI)
-            v1 = ((-1 * unit_length * rotate(18, 'cos')) + x, (-1 * unit_length * rotate(18, 'sin')) + y)
+            v1 = ((-1 * unit_length * self.rotate(18, 'cos')) + x,
+                  (-1 * unit_length * self.rotate(18, 'sin')) + y)
 
         # Rotate the tile to match user's orientation
         v0 = self.rotate_point(v0, v0, 0)
@@ -97,11 +101,11 @@ class Tile:
 
         return new_x, new_y
 
-
-def rotate(angle, trig_function):
-    if trig_function == 'cos':
-        return round(math.cos(angle * (math.pi / 180)), 10)
-    elif trig_function == 'sin':
-        return round(math.sin(angle * (math.pi / 180)), 10)
-    else:
-        print('trig function \'', trig_function, '\' not found.')
+    @staticmethod
+    def rotate(angle, trig_function):
+        if trig_function == 'cos':
+            return round(math.cos(angle * (math.pi / 180)), 10)
+        elif trig_function == 'sin':
+            return round(math.sin(angle * (math.pi / 180)), 10)
+        else:
+            print('trig function \'', trig_function, '\' not found.')

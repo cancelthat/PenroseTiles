@@ -49,6 +49,7 @@ tiles_generated = 1
 # get rid of bacon and eggs for tile building name
 # switch force_tiles(vertices, tiles) to force_tiles(tiles, vertices)
 # restructure the build animation loops
+# I should really think about how the recursive function works. Maybe there's a way to optimize it
 
 
 def show_stats(amount):
@@ -213,9 +214,9 @@ while game_is_running:
             if high_lighter_active:
                 temp_tile.append(created_tile)
 
-        # Places a new tile where the user left clicks
+        # Places a new tile where the user clicks
         if event.type == pygame.MOUSEBUTTONUP:
-            # Right mouse button click
+            # Left mouse button pressed
             if event.button == 1:
                 created_tile = create_new_tile(all_tiles)
                 if created_tile is None:
@@ -244,7 +245,7 @@ while game_is_running:
                 wire_frame_active = not wire_frame_active
 
             # ------------- debug ---------------
-            elif event.key == pygame.K_t:  # rerun force_tiles
+            elif event.key == pygame.K_t:
                 print('debug')
                 force_tiles(all_vertices, all_tiles)
 
@@ -253,10 +254,10 @@ while game_is_running:
                 game_is_running = False
 
             # ------------- assign new colors ---------------
-            elif event.key == pygame.K_e:
+            elif event.key == pygame.K_e:   # random
                 for tile in all_tiles:
                     tile.set_random_color()
-            elif event.key == pygame.K_q:
+            elif event.key == pygame.K_q:   # all black
                 for tile in all_tiles:
                     tile.color = (0, 0, 0)
 
@@ -276,7 +277,7 @@ while game_is_running:
                 high_lighter_active = not high_lighter_active
 
             # ------------- inflate ---------------
-            elif event.key == pygame.K_x:  # inflate
+            elif event.key == pygame.K_x:
                 print('inflating')
                 returned_tiles, returned_vertices = inflate_tiles(all_vertices)
                 if returned_tiles:
@@ -349,6 +350,7 @@ while game_is_running:
         if build_animation_active:
             temps = all_tiles.copy()
             temps.sort()
+            temps.reverse()
             for bacon in range(1, len(temps) + 1):
                 for index, eggs in enumerate(temps[:bacon]):
                     if wire_frame_active:

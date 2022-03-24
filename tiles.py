@@ -1,6 +1,7 @@
 import math
 import random
 
+fall_colors = [(253, 197, 52), (251, 171, 52), (235, 137, 71), (199, 90, 72), (176, 59, 55), (110, 49, 68)]
 
 class Tile:
 

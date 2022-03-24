@@ -12,7 +12,7 @@ pygame.init()
 # Adjustable Variables
 initial_tile = Kite()
 UNIT_LENGTH = 20
-displacement_amount = 10
+displacement_amount = 25
 
 # Display Dimensions
 DISPLAY_WIDTH = 800
@@ -29,13 +29,13 @@ game_is_running = True
 kite_is_selected = True
 wire_frame_active = False
 build_animation_active = False
-high_lighter_active = False
+guide_tile_active = True
 prince_vertex_active = False
 
 # Information Holders
 all_tiles = []
 all_vertices = []
-temp_tile = []
+guide_tile = []
 tiles_generated = 1
 
 # random note: Kings, stars, and sun don't overlap
@@ -50,6 +50,7 @@ tiles_generated = 1
 # switch force_tiles(vertices, tiles) to force_tiles(tiles, vertices)
 # restructure the build animation loops
 # I should really think about how the recursive function works. Maybe there's a way to optimize it
+# make dictionary key hashable
 
 
 def show_stats(amount):
@@ -93,16 +94,19 @@ def create_new_tile(tiles):
         vertical = 'bottom'
     direction = vertical + '-' + horizontal
 
-    if kite_is_selected:
-        new_tile = Kite()
-    else:
-        new_tile = Dart()
+    new_kite = Kite()
+    new_dart = Dart()
 
-    new_tile.draw(closest_tile, direction)
+    new_kite.draw(closest_tile, direction)
+    new_dart.draw(closest_tile, direction)
 
-    if new_tile in tiles:
+    if new_kite in tiles or new_dart in tiles:
         return None
-    return new_tile
+
+    if kite_is_selected:
+        return new_kite
+    else:
+        return new_dart
 
 
 def deflate_tiles(tiles_to_deflate):
@@ -209,10 +213,10 @@ while game_is_running:
 
         # This creates the highlighted tile for user visuals
         if event.type == pygame.MOUSEMOTION:
-            temp_tile = []
+            guide_tile = []
             created_tile = create_new_tile(all_tiles)
-            if high_lighter_active:
-                temp_tile.append(created_tile)
+            if guide_tile_active:
+                guide_tile.append(created_tile)
 
         # Places a new tile where the user clicks
         if event.type == pygame.MOUSEBUTTONUP:
@@ -240,16 +244,16 @@ while game_is_running:
                 print('Next shape: dart') if kite_is_selected else print('Next shape: kite')
                 kite_is_selected = not kite_is_selected
 
-            # ---------- wire frame mode ------------
-            elif event.key == pygame.K_c:
-                wire_frame_active = not wire_frame_active
-
             # ------------- debug ---------------
             elif event.key == pygame.K_t:
                 print('debug')
                 force_tiles(all_vertices, all_tiles)
 
-            # ---------- quit ------------
+            # ---------- wire frame mode ------------
+            elif event.key == pygame.K_c:
+                wire_frame_active = not wire_frame_active
+
+            # ---------- exit ------------
             elif event.key == pygame.K_ESCAPE:
                 game_is_running = False
 
@@ -268,13 +272,13 @@ while game_is_running:
                 all_vertices = []
                 update_vertices(initial_tile, all_vertices)
 
-            # ------------- build animation ---------------
+            # ------------- run build animation ---------------
             elif event.key == pygame.K_b:
                 build_animation_active = True
 
-            # ------------- highlighter tile ---------------
+            # ------------- guide tile ---------------
             elif event.key == pygame.K_f:
-                high_lighter_active = not high_lighter_active
+                guide_tile_active = not guide_tile_active
 
             # ------------- inflate ---------------
             elif event.key == pygame.K_x:
@@ -296,26 +300,26 @@ while game_is_running:
                 tiles_generated = show_stats(tiles_generated)
 
             # ------------- move tiles ---------------
-            elif event.key == pygame.K_w:
+            elif event.key == pygame.K_w and len(all_tiles) < 1000:
                 all_vertices = move_tiles(all_tiles, (0, -displacement_amount))
                 force_tiles(all_vertices, all_tiles)
-            elif event.key == pygame.K_s:
+            elif event.key == pygame.K_s and len(all_tiles) < 1000:
                 all_vertices = move_tiles(all_tiles, (0, displacement_amount))
                 force_tiles(all_vertices, all_tiles)
-            elif event.key == pygame.K_a:
+            elif event.key == pygame.K_a and len(all_tiles) < 1000:
                 all_vertices = move_tiles(all_tiles, (-displacement_amount, 0))
                 force_tiles(all_vertices, all_tiles)
-            elif event.key == pygame.K_d:
+            elif event.key == pygame.K_d and len(all_tiles) < 1000:
                 all_vertices = move_tiles(all_tiles, (displacement_amount, 0))
                 force_tiles(all_vertices, all_tiles)
 
             # ------------- recolor vertices ---------------
             elif event.key == pygame.K_1:
                 for vertex in all_vertices:
-                    if vertex.name == 'sun':
+                    if vertex.name == 'edge':
                         for val in vertex.congruent_vertices:
                             fail = val[0]
-                            fail.set_random_color()
+                            fail.color = (255, 255, 255)
             elif event.key == pygame.K_2:
                 for vertex in all_vertices:
                     if vertex.name == 'star':
@@ -347,35 +351,36 @@ while game_is_running:
                             fail = val[0]
                             fail.set_random_color()
 
+        # Pygame Drawing
         if build_animation_active:
             temps = all_tiles.copy()
-            temps.sort()
-            temps.reverse()
-            for bacon in range(1, len(temps) + 1):
-                for index, eggs in enumerate(temps[:bacon]):
+            # temps.sort()
+            # temps.reverse()
+            for end in range(1, len(temps) + 1):
+                for index, tile in enumerate(temps[:end]):
                     if wire_frame_active:
-                        pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=2)
+                        pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)
                     else:
-                        pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=0)
+                        pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=0)
                 pygame.display.update()
 
-                build_time = 35
+                build_time = 3
                 if build_time == 0:
                     build_time = 1
                 pygame.time.wait(build_time)
             build_animation_active = False
-        elif wire_frame_active:
-            for index, eggs in enumerate(all_tiles):
-                pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=2)
-                # pygame.draw.circle(DISPLAY, (0, 0, 200), center=eggs.center, radius=3)
-                if temp_tile:
-                    if temp_tile[0] is not None:
-                        pygame.draw.polygon(DISPLAY, (255, 255, 255), temp_tile[0].vertices, width=0)
         else:
-            for index, eggs in enumerate(all_tiles):
-                pygame.draw.polygon(DISPLAY, eggs.color, eggs.vertices, width=0)
+            if wire_frame_active:
+                for index, tile in enumerate(all_tiles):
+                    pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)
+                if guide_tile:
+                    if guide_tile[0] is not None:
+                        pygame.draw.polygon(DISPLAY, (255, 255, 255), guide_tile[0].vertices, width=0)
+            else:
+                for index, tile in enumerate(all_tiles):
+                    pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=0)
+                if guide_tile:
+                    if guide_tile[0] is not None:
+                        pygame.draw.polygon(DISPLAY, (255, 255, 255), guide_tile[0].vertices, width=2)
 
-            if temp_tile:
-                if temp_tile[0] is not None:
-                    pygame.draw.polygon(DISPLAY, (255, 255, 255), temp_tile[0].vertices, width=2)
         pygame.display.update()

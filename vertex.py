@@ -1,7 +1,6 @@
 class Vertex:
     # change coordinates to a 2d list, rather a tuple
     def __init__(self, tile_to_add, coordinates, name='edge'):
-        self.tiles = [tile_to_add]
         self.coordinates = coordinates
         self.name = name
         # list of 2D tuples, holding a tile and the tile's congruent vertex. ex [(Kite(), 1), (Dart(), 0)]
@@ -15,7 +14,3 @@ class Vertex:
         if abs(value) < 0.001:
             return True
         return False
-
-    def add_tile(self, tile_to_add):
-        if not (tile_to_add in self.tiles):
-            self.tiles.append(tile_to_add)

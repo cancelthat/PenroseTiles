@@ -59,9 +59,6 @@ dictionary_of_all_unique_possibilities = {(('dart', 2), ): 'ace',
                                           (('dart', 1), ('dart', 3), ('kite', 0)): 'deuce-jack'}
 
 
-# ----------------------------- I need to build each royal vertex's base case
-
-
 def force_tiles(vertices, tiles):
 
     tiles_len = len(tiles)
@@ -83,64 +80,474 @@ def force_tiles(vertices, tiles):
             if vertex_key == 'ace':
                 edge_vertex.name = 'ace'
                 dart = None
+                k1, k3 = None, None
                 for val in edge_vertex.congruent_vertices:
                     if val[0].name == 'dart':
                         dart = val[0]
+                    elif val[1] == 1:
+                        k1 = val[0]
+                    else:
+                        k3 = val[0]
 
-                right_kite = Kite()
-                right_kite.draw(dart, 'bottom-left')
+                if k1 is None:
+                    new_kite = Kite()
+                    new_kite.draw(dart, 'bottom-left')
+                    update_tiles(new_kite, tiles, vertices, False)
+                if k3 is None:
+                    new_kite = Kite()
+                    new_kite.draw(dart, 'bottom-right')
+                    update_tiles(new_kite, tiles, vertices, False)
 
-                left_kite = Kite()
-                left_kite.draw(dart, 'bottom-right')
-
-                update_tiles([right_kite, left_kite], tiles, vertices)
             elif vertex_key == 'sun':
                 edge_vertex.name = 'sun'
-                for val in edge_vertex.congruent_vertices:
-                    new_kite_left = Kite()
-                    new_kite_right = Kite()
-                    new_kite_left.draw(val[0], 'bottom-left')
-                    new_kite_right.draw(val[0], 'bottom-right')
-                    update_tiles([new_kite_right, new_kite_left], tiles, vertices)
 
-                    if len(edge_vertex.congruent_vertices) == 5:
-                        break
+                if len(edge_vertex.congruent_vertices) == 5:
+                    continue
+
+                k1, k2, k3, k4 = None, None, None, None
+                for val in edge_vertex.congruent_vertices:
+                    if k1 is None:
+                        k1 = val[0]
+                    else:
+                        if k2 is None:
+                            k2 = val[0]
+                        else:
+                            if k3 is None:
+                                k3 = val[0]
+                            else:
+                                k4 = val[0]
+
+                if k4 is None:
+                    new_kite1, new_kite2 = Kite(), Kite()
+                    # k1, k2, -, -, -
+                    if compare_coord(k1.vertices[1], k2.vertices[3]):
+                        # k1, k2, k3, -, -
+                        if compare_coord(k2.vertices[1], k3.vertices[3]):
+                            new_kite1.draw(k1, 'bottom-left')
+                            new_kite2.draw(k3, 'bottom-right')
+                        # k1, k2, -, -, k3
+                        elif compare_coord(k1.vertices[3], k3.vertices[1]):
+                            new_kite1.draw(k3, 'bottom-left')
+                            new_kite2.draw(k2, 'bottom-right')
+                        # k1, k2, -, k3, -
+                        else:
+                            new_kite1.draw(k1, 'bottom-left')
+                            new_kite2.draw(k2, 'bottom-right')
+                    # k1, -, -, -, k2
+                    elif compare_coord(k1.vertices[3], k2.vertices[1]):
+                        # k1, -, -, k3, k2
+                        if compare_coord(k2.vertices[3], k3.vertices[1]):
+                            new_kite1.draw(k3, 'bottom-left')
+                            new_kite2.draw(k1, 'bottom-right')
+                        # k1, k3, -, -, k2
+                        elif compare_coord(k1.vertices[1], k3.vertices[3]):
+                            new_kite1.draw(k2, 'bottom-left')
+                            new_kite2.draw(k3, 'bottom-right')
+                        # k1, -, k3, -, k2
+                        else:
+                            new_kite1.draw(k1, 'bottom-left')
+                            new_kite2.draw(k2, 'bottom-right')
+                    # k1, k3, -, -, -
+                    elif compare_coord(k1.vertices[1], k3.vertices[3]):
+                        # k1, k3, k2, -, -
+                        if compare_coord(k3.vertices[1], k2.vertices[3]):
+                            new_kite1.draw(k1, 'bottom-left')
+                            new_kite2.draw(k2, 'bottom-right')
+                        # k1, k3, -, -, k2
+                        elif compare_coord(k1.vertices[3], k2.vertices[1]):
+                            new_kite1.draw(k2, 'bottom-left')
+                            new_kite2.draw(k3, 'bottom-right')
+                        # k1, k3, -, k2, -
+                        else:
+                            new_kite1.draw(k1, 'bottom-left')
+                            new_kite2.draw(k3, 'bottom-right')
+                    # k1, -, -, -, k3
+                    elif compare_coord(k3.vertices[1], k1.vertices[3]):
+                        # k1, k2, -, -, k3
+                        if compare_coord(k1.vertices[1], k2.vertices[3]):
+                            new_kite1.draw(k3, 'bottom-left')
+                            new_kite2.draw(k2, 'bottom-right')
+                        # k1, -, -, k2, k3
+                        elif compare_coord(k1.vertices[1], k3.vertices[3]):
+                            new_kite1.draw(k2, 'bottom-left')
+                            new_kite2.draw(k1, 'bottom-right')
+                        # k1, -, k2, -, k3
+                        else:
+                            new_kite1.draw(k3, 'bottom-left')
+                            new_kite2.draw(k1, 'bottom-right')
+                    update_tiles([new_kite1, new_kite2], tiles, vertices, False)
+                else:
+                    new_kite = Kite()
+                    # k1, k2, -, -, -
+                    if compare_coord(k1.vertices[1], k2.vertices[3]):
+                        # k1, k2, k3, -, -
+                        if compare_coord(k2.vertices[1], k3.vertices[3]):
+                            # k1, k2, k3, k4, -
+                            if compare_coord(k3.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, k2, k3, -, k4
+                            else:
+                                new_kite.draw(k3, 'bottom-right')
+                        # k1, k2, -, -, k3
+                        elif compare_coord(k3.vertices[1], k1.vertices[3]):
+                            # k1, k2, k4, -, k3
+                            if compare_coord(k2.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, k2, -, k4, k3
+                            else:
+                                new_kite.draw(k2, 'bottom-right')
+                        # k1, k2, -, k3, -
+                        else:
+                            # k1, k2, k4, k3, -
+                            if compare_coord(k2.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, k2, -, k3, k4
+                            else:
+                                new_kite.draw(k2, 'bottom-right')
+                    # k1, - , -, -, k2
+                    elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                        # k1, k3, -, -, k2
+                        if compare_coord(k1.vertices[1], k3.vertices[3]):
+                            # k1, k3, -, k4, k2
+                            if compare_coord(k4.vertices[1], k2.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, k3, k4, -, k2
+                            else:
+                                new_kite.draw(k4, 'bottom-right')
+                        # k1, -, -, k3, k2
+                        elif compare_coord(k3.vertices[1], k2.vertices[3]):
+                            # k1, k4, -, k3, k2
+                            if compare_coord(k1.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, -, k4, k3, k2
+                            else:
+                                new_kite.draw(k1, 'bottom-right')
+                        # k1, -, k3, -, k2
+                        else:
+                            # k1, k4, k3, -, k2
+                            if compare_coord(k1.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, -, k3, k4, k2
+                            else:
+                                new_kite.draw(k1, 'bottom-right')
+                    # k1, k3, -, - , -
+                    elif compare_coord(k1.vertices[1], k3.vertices[3]):
+                        # k1, k3, k2, - , -
+                        if compare_coord(k3.vertices[1], k2.vertices[3]):
+                            # k1, k3, k2, k4 , -
+                            if compare_coord(k2.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, k3, k2, - , k4
+                            else:
+                                new_kite.draw(k2, 'bottom-right')
+                        # k1, k3, -, - , k2
+                        elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                            # k1, k3, k4, - , k2
+                            if compare_coord(k3.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, k3, -, k4 , k2
+                            else:
+                                new_kite.draw(k3, 'bottom-right')
+                        # k1, k3, -, k2 , -
+                        else:
+                            # k1, k3, k4, k2 , -
+                            if compare_coord(k3.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k2, 'bottom-right')
+                            # k1, k3, -, k2 , k4
+                            else:
+                                new_kite.draw(k3, 'bottom-right')
+                    # k1, -, -, -, k3
+                    elif compare_coord(k3.vertices[1], k1.vertices[3]):
+                        # k1, k2, -, -, k3
+                        if compare_coord(k1.vertices[1], k2.vertices[3]):
+                            # k1, k2, k4, -, k3
+                            if compare_coord(k2.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, k2, -, k4, k3
+                            else:
+                                new_kite.draw(k2, 'bottom-right')
+                        # k1, -, -, k2, k3
+                        elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                            # k1, k4, -, k2, k3
+                            if compare_coord(k1.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k4, 'bottom-right')
+                            # k1, -, k4, k2, k3
+                            else:
+                                new_kite.draw(k1, 'bottom-right')
+                        # k1, -, k2, -, k3
+                        else:
+                            # k1, k4, k2, -, k3
+                            if compare_coord(k1.vertices[1], k4.vertices[3]):
+                                new_kite.draw(k2, 'bottom-right')
+                            # k1, -, k2, k4, k3
+                            else:
+                                new_kite.draw(k1, 'bottom-right')
+                    # k1, k4, -, -, -
+                    elif compare_coord(k1.vertices[1], k4.vertices[3]):
+                        # k1, k4, k2, -, -
+                        if compare_coord(k4.vertices[1], k2.vertices[3]):
+                            # k1, k4, k2, k3, -
+                            if compare_coord(k2.vertices[1], k3.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, k4, k2, -, k3
+                            else:
+                                new_kite.draw(k2, 'bottom-right')
+                        # k1, k4, -, -, k2
+                        elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                            # k1, k4, k3, -, k2
+                            if compare_coord(k4.vertices[1], k3.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, k4, -, k3, k2
+                            else:
+                                new_kite.draw(k4, 'bottom-right')
+                        # k1, k4, -, k2, -
+                        else:
+                            # k1, k4, k3, k2, -
+                            if compare_coord(k4.vertices[1], k3.vertices[3]):
+                                new_kite.draw(k2, 'bottom-right')
+                            # k1, k4, -, k2, k3
+                            else:
+                                new_kite.draw(k4, 'bottom-right')
+                    # k1, -, -, -, k4
+                    elif compare_coord(k4.vertices[1], k1.vertices[3]):
+                        # k1, k2, -, -, k4
+                        if compare_coord(k1.vertices[1], k2.vertices[3]):
+                            # k1, k2, k3, -, k4
+                            if compare_coord(k2.vertices[1], k3.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, k2, -, k3, k4
+                            else:
+                                new_kite.draw(k2, 'bottom-right')
+                        # k1, -, -, k2, k4
+                        elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                            # k1, k3, -, k2, k4
+                            if compare_coord(k1.vertices[1], k3.vertices[3]):
+                                new_kite.draw(k3, 'bottom-right')
+                            # k1, -, k3, k2, k4
+                            else:
+                                new_kite.draw(k1, 'bottom-right')
+                        # k1, -, k2, -, k4
+                        else:
+                            # k1, k3, k2, -, k4
+                            if compare_coord(k1.vertices[1], k3.vertices[3]):
+                                new_kite.draw(k2, 'bottom-right')
+                            # k1, -, k2, k3, k4
+                            else:
+                                new_kite.draw(k1, 'bottom-right')
+                    update_tiles(new_kite, tiles, vertices, False)
+
             elif vertex_key == 'star':
                 edge_vertex.name = 'star'
-                for val in edge_vertex.congruent_vertices:
-                    new_dart_left = Dart()
-                    new_dart_right = Dart()
-                    new_dart_left.draw(val[0], 'top-left')
-                    new_dart_right.draw(val[0], 'top-right')
-                    update_tiles([new_dart_left, new_dart_right], tiles, vertices)
 
-                    if len(edge_vertex.congruent_vertices) == 5:
-                        break
+                if len(edge_vertex.congruent_vertices) == 5:
+                    continue
+
+                k1, k2, k3, k4 = None, None, None, None
+                for val in edge_vertex.congruent_vertices:
+                    if k1 is None:
+                        k1 = val[0]
+                    else:
+                        if k2 is None:
+                            k2 = val[0]
+                        else:
+                            if k3 is None:
+                                k3 = val[0]
+                            else:
+                                k4 = val[0]
+
+                new_kite = Dart()
+                # k1, k2, -, -, -
+                if compare_coord(k1.vertices[1], k2.vertices[3]):
+                    # k1, k2, k3, -, -
+                    if compare_coord(k2.vertices[1], k3.vertices[3]):
+                        # k1, k2, k3, k4, -
+                        if compare_coord(k3.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, k2, k3, -, k4
+                        else:
+                            new_kite.draw(k3, 'top-right')
+                    # k1, k2, -, -, k3
+                    elif compare_coord(k3.vertices[1], k1.vertices[3]):
+                        # k1, k2, k4, -, k3
+                        if compare_coord(k2.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, k2, -, k4, k3
+                        else:
+                            new_kite.draw(k2, 'top-right')
+                    # k1, k2, -, k3, -
+                    else:
+                        # k1, k2, k4, k3, -
+                        if compare_coord(k2.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, k2, -, k3, k4
+                        else:
+                            new_kite.draw(k2, 'top-right')
+                # k1, - , -, -, k2
+                elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                    # k1, k3, -, -, k2
+                    if compare_coord(k1.vertices[1], k3.vertices[3]):
+                        # k1, k3, -, k4, k2
+                        if compare_coord(k4.vertices[1], k2.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, k3, k4, -, k2
+                        else:
+                            new_kite.draw(k4, 'top-right')
+                    # k1, -, -, k3, k2
+                    elif compare_coord(k3.vertices[1], k2.vertices[3]):
+                        # k1, k4, -, k3, k2
+                        if compare_coord(k1.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, -, k4, k3, k2
+                        else:
+                            new_kite.draw(k1, 'top-right')
+                    # k1, -, k3, -, k2
+                    else:
+                        # k1, k4, k3, -, k2
+                        if compare_coord(k1.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, -, k3, k4, k2
+                        else:
+                            new_kite.draw(k1, 'top-right')
+                # k1, k3, -, - , -
+                elif compare_coord(k1.vertices[1], k3.vertices[3]):
+                    # k1, k3, k2, - , -
+                    if compare_coord(k3.vertices[1], k2.vertices[3]):
+                        # k1, k3, k2, k4 , -
+                        if compare_coord(k2.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, k3, k2, - , k4
+                        else:
+                            new_kite.draw(k2, 'top-right')
+                    # k1, k3, -, - , k2
+                    elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                        # k1, k3, k4, - , k2
+                        if compare_coord(k3.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, k3, -, k4 , k2
+                        else:
+                            new_kite.draw(k3, 'top-right')
+                    # k1, k3, -, k2 , -
+                    else:
+                        # k1, k3, k4, k2 , -
+                        if compare_coord(k3.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k2, 'top-right')
+                        # k1, k3, -, k2 , k4
+                        else:
+                            new_kite.draw(k3, 'top-right')
+                # k1, -, -, -, k3
+                elif compare_coord(k3.vertices[1], k1.vertices[3]):
+                    # k1, k2, -, -, k3
+                    if compare_coord(k1.vertices[1], k2.vertices[3]):
+                        # k1, k2, k4, -, k3
+                        if compare_coord(k2.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, k2, -, k4, k3
+                        else:
+                            new_kite.draw(k2, 'top-right')
+                    # k1, -, -, k2, k3
+                    elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                        # k1, k4, -, k2, k3
+                        if compare_coord(k1.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k4, 'top-right')
+                        # k1, -, k4, k2, k3
+                        else:
+                            new_kite.draw(k1, 'top-right')
+                    # k1, -, k2, -, k3
+                    else:
+                        # k1, k4, k2, -, k3
+                        if compare_coord(k1.vertices[1], k4.vertices[3]):
+                            new_kite.draw(k2, 'top-right')
+                        # k1, -, k2, k4, k3
+                        else:
+                            new_kite.draw(k1, 'top-right')
+                # k1, k4, -, -, -
+                elif compare_coord(k1.vertices[1], k4.vertices[3]):
+                    # k1, k4, k2, -, -
+                    if compare_coord(k4.vertices[1], k2.vertices[3]):
+                        # k1, k4, k2, k3, -
+                        if compare_coord(k2.vertices[1], k3.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, k4, k2, -, k3
+                        else:
+                            new_kite.draw(k2, 'top-right')
+                    # k1, k4, -, -, k2
+                    elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                        # k1, k4, k3, -, k2
+                        if compare_coord(k4.vertices[1], k3.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, k4, -, k3, k2
+                        else:
+                            new_kite.draw(k4, 'top-right')
+                    # k1, k4, -, k2, -
+                    else:
+                        # k1, k4, k3, k2, -
+                        if compare_coord(k4.vertices[1], k3.vertices[3]):
+                            new_kite.draw(k2, 'top-right')
+                        # k1, k4, -, k2, k3
+                        else:
+                            new_kite.draw(k4, 'top-right')
+                # k1, -, -, -, k4
+                elif compare_coord(k4.vertices[1], k1.vertices[3]):
+                    # k1, k2, -, -, k4
+                    if compare_coord(k1.vertices[1], k2.vertices[3]):
+                        # k1, k2, k3, -, k4
+                        if compare_coord(k2.vertices[1], k3.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, k2, -, k3, k4
+                        else:
+                            new_kite.draw(k2, 'top-right')
+                    # k1, -, -, k2, k4
+                    elif compare_coord(k2.vertices[1], k1.vertices[3]):
+                        # k1, k3, -, k2, k4
+                        if compare_coord(k1.vertices[1], k3.vertices[3]):
+                            new_kite.draw(k3, 'top-right')
+                        # k1, -, k3, k2, k4
+                        else:
+                            new_kite.draw(k1, 'top-right')
+                    # k1, -, k2, -, k4
+                    else:
+                        # k1, k3, k2, -, k4
+                        if compare_coord(k1.vertices[1], k3.vertices[3]):
+                            new_kite.draw(k2, 'top-right')
+                        # k1, -, k2, k3, k4
+                        else:
+                            new_kite.draw(k1, 'top-right')
+                update_tiles(new_kite, tiles, vertices, False)
+
             elif vertex_key == 'deuce':
                 edge_vertex.name = 'deuce'
-                kite_left, kite_right = None, None
+                k0, kite0 = None, None
+                d1, d3 = None, None
                 for val in edge_vertex.congruent_vertices:
                     if val[0].name == 'kite':
-                        if kite_left is None:
-                            kite_left = val[0]
+                        if k0 is None:
+                            k0 = val[0]
                         else:
-                            kite_right = val[0]
+                            kite0 = val[0]
+                    elif val[1] == 1:
+                        d1 = val[0]
+                    else:
+                        d3 = val[0]
 
-                new_left_dart = Dart()
-                new_right_dart = Dart()
-                if compare_coord(kite_left.vertices[1], kite_right.vertices[3]):
-                    new_left_dart.draw(kite_left, 'top-left')
-                    new_right_dart.draw(kite_right, 'top-right')
-                else:
-                    new_left_dart.draw(kite_right, 'top-left')
-                    new_right_dart.draw(kite_left, 'top-right')
+                if compare_coord(kite0.vertices[1], k0.vertices[3]):
+                    k_temp = k0
+                    k0 = kite0
+                    kite0 = k_temp
 
-                update_tiles([new_left_dart, new_right_dart], tiles, vertices)
+                if d1 is None:
+                    new_dart = Dart()
+                    new_dart.draw(k0, 'top-left')
+                    update_tiles(new_dart, tiles, vertices, False)
+                if d3 is None:
+                    new_dart = Dart()
+                    new_dart.draw(kite0, 'top-right')
+                    update_tiles(new_dart, tiles, vertices, False)
+
             elif vertex_key == 'jack':
                 edge_vertex.name = 'jack'
                 d1, d3 = None, None
                 k0 = None
-                k2 = None
+                k2, kite2 = None, None
 
                 for val in edge_vertex.congruent_vertices:
                     if (val[0].name, val[1]) == ('dart', 1):
@@ -150,43 +557,57 @@ def force_tiles(vertices, tiles):
                     elif (val[0].name, val[1]) == ('kite', 0):
                         k0 = val[0]
                     else:
-                        k2 = val[0]
+                        if k2 is None:
+                            k2 = val[0]
+                        else:
+                            kite2 = val[0]
 
-                # (('dart', 1), ('kite', 2)): 'jack'
-                if d1 is not None and k2 is not None:
-                    new_d3 = Dart()
-                    new_k0 = Kite()
-                    new_k0.draw(d1, 'bottom-right')
-                    new_d3.draw(new_k0, 'top-right')
-                    new_kite_left, new_kite_right = Kite(), Kite()
-                    new_kite_left.draw(d1, 'top-right')
-                    new_kite_right.draw(new_d3, 'top-left')
-                    update_tiles([new_d3, new_k0, new_kite_left, new_kite_right], tiles, vertices)
-                # (('dart', 3), ('kite', 2)): 'jack'
-                elif d3 is not None and k2 is not None:
-                    new_d1 = Dart()
-                    new_k0 = Kite()
-                    new_k0.draw(d3, 'bottom-left')
-                    new_d1.draw(new_k0, 'top-left')
-                    new_kite_left, new_kite_right = Kite(), Kite()
-                    new_kite_left.draw(new_d1, 'top-right')
-                    new_kite_right.draw(d3, 'top-left')
-                    update_tiles([new_d1, new_k0, new_kite_left, new_kite_right], tiles, vertices)
-                # (('kite', 0), ('kite', 2)): 'jack'
-                elif k0 is not None and k2 is not None:
-                    new_d1, new_d3 = Dart(), Dart()
-                    new_d1.draw(k0, 'top-left')
-                    new_d3.draw(k0, 'top-right')
-                    new_kite_left, new_kite_right = Kite(), Kite()
-                    new_kite_left.draw(new_d1, 'top-right')
-                    new_kite_right.draw(new_d3, 'top-left')
-                    update_tiles([new_d1, new_d3, new_kite_left, new_kite_right], tiles, vertices)
-                else:
-                    print('jack-error')
+                if k0 is None:
+                    if d1 is None:
+                        new_d1 = Dart()
+                        new_k0 = Kite()
+                        new_k0.draw(d3, 'bottom-left')
+                        new_d1.draw(new_k0, 'top-left')
+                        update_tiles([new_d1, new_k0], tiles, vertices, False)
+                        d1 = new_d1
+                        k0 = new_k0
+                    elif d3 is None:
+                        new_d3 = Dart()
+                        new_k0 = Kite()
+                        new_k0.draw(d1, 'bottom-right')
+                        new_d3.draw(new_k0, 'top-right')
+                        update_tiles([new_d3, new_k0], tiles, vertices, False)
+                        d3 = new_d3
+                        k0 = new_k0
+                    else:
+                        new_k0 = Kite()
+                        new_k0.draw(d1, 'bottom-right')
+                        update_tiles(new_k0, tiles, vertices, False)
+                        k0 = new_k0
+
+                if d1 is None:
+                    new_dart = Dart()
+                    new_dart.draw(k0, 'top-left')
+                    update_tiles(new_dart, tiles, vertices, False)
+                    d1 = new_dart
+                if d3 is None:
+                    new_dart = Dart()
+                    new_dart.draw(k0, 'top-right')
+                    update_tiles(new_dart, tiles, vertices, False)
+                    d3 = new_dart
+                if kite2 is None:
+                    new_kite = Kite()
+                    if compare_coord(d1.vertices[0], k2.vertices[3]):
+                        new_kite.draw(d3, 'top-left')
+                    else:
+                        new_kite.draw(d1, 'top-right')
+                    update_tiles(new_kite, tiles, vertices, False)
+
             elif vertex_key == 'queen':
                 edge_vertex.name = 'queen'
                 k1, kite1 = None, None
                 k3, kite3 = None, None
+                d0 = None
                 for val in edge_vertex.congruent_vertices:
                     if (val[0].name, val[1]) == ('kite', 1):
                         if k1 is None:
@@ -198,33 +619,57 @@ def force_tiles(vertices, tiles):
                             k3 = val[0]
                         else:
                             kite3 = val[0]
-
-                # (('kite', 1), ('kite', 1)): 'queen'
-                if k1 is not None and kite1 is not None:
-                    new_k3, new_kite3 = Kite(), Kite()
-                    new_k3.draw(k1, 'top-right')
-                    new_kite3.draw(kite1, 'top-right')
-
-                    new_dart = Dart()
-                    if compare_coord(k1.vertices[2], new_kite3.vertices[2]):
-                        new_dart.draw(kite1, 'bottom-right')
                     else:
-                        new_dart.draw(k1, 'bottom-right')
-                    update_tiles([new_k3, new_kite3, new_dart], tiles, vertices)
-                # (('kite', 3), ('kite', 3)): 'queen'
-                elif k3 is not None and kite3 is not None:
+                        d0 = val[0]
+
+                if k1 is None:
                     new_k1, new_kite1 = Kite(), Kite()
                     new_k1.draw(k3, 'top-left')
                     new_kite1.draw(kite3, 'top-left')
+                    update_tiles([new_k1, new_kite1], tiles, vertices, False)
+                    k1 = new_k1
+                    kite1 = new_kite1
 
-                    new_dart = Dart()
-                    if compare_coord(k3.vertices[2], new_kite1.vertices[2]):
-                        new_dart.draw(kite3, 'bottom-left')
+                if k3 is None:
+                    new_k3, new_kite3 = Kite(), Kite()
+                    new_k3.draw(k1, 'top-right')
+                    new_kite3.draw(kite1, 'top-right')
+                    update_tiles([new_k3, new_kite3], tiles, vertices, False)
+                    k3 = new_k3
+                    kite3 = new_kite3
+
+                if kite1 is None:
+                    new_kite = Kite()
+                    if compare_coord(k1.vertices[0], k3.vertices[0]):
+                        new_kite.draw(kite3, 'top-left')
                     else:
-                        new_dart.draw(k3, 'bottom-left')
-                    update_tiles([new_k1, new_kite1, new_dart], tiles, vertices)
-                else:
-                    print('queen-error')
+                        new_kite.draw(k3, 'top-left')
+                    update_tiles(new_kite, tiles, vertices, False)
+                    kite1 = new_kite
+
+                if kite3 is None:
+                    new_kite = Kite()
+                    if compare_coord(k1.vertices[0], k3.vertices[0]):
+                        new_kite.draw(kite1, 'top-right')
+                    else:
+                        new_kite.draw(k1, 'top-right')
+                    update_tiles(new_kite, tiles, vertices, False)
+                    kite3 = new_kite
+
+                if d0 is None:
+                    new_dart = Dart()
+                    if compare_coord(k1.vertices[0], k3.vertices[0]):
+                        if compare_coord(k1.vertices[2], kite3.vertices[2]):
+                            new_dart.draw(k3, 'bottom-left')
+                        else:
+                            new_dart.draw(k1, 'bottom-right')
+                    else:
+                        if compare_coord(k1.vertices[2], k3.vertices[2]):
+                            new_dart.draw(kite3, 'bottom-left')
+                        else:
+                            new_dart.draw(k1, 'bottom-right')
+                    update_tiles(new_dart, tiles, vertices, False)
+
             elif vertex_key == 'king':
                 edge_vertex.name = 'king'
                 k1, k3 = None, None
@@ -243,25 +688,23 @@ def force_tiles(vertices, tiles):
                             else:
                                 d3 = val[0]
 
-                # (('dart', 0), ('dart', 0), ('kite', 1)): 'king'
-                if k1 is not None and k3 is None:
-                    new_k3 = Kite()
-                    new_k3.draw(k1, 'top-right')
-                    update_tiles(new_k3, tiles, vertices)
-                    k3 = new_k3
-                elif k3 is not None and k1 is None:
-                    new_k1 = Kite()
-                    new_k1.draw(k3, 'top-left')
-                    update_tiles(new_k1, tiles, vertices)
-                    k1 = new_k1
+                if k1 is None:
+                    new_kite = Kite()
+                    new_kite.draw(k3, 'top-left')
+                    update_tiles(new_kite, tiles, vertices, False)
+                    k1 = new_kite
+                elif k3 is None:
+                    new_kite = Kite()
+                    new_kite.draw(k1, 'top-right')
+                    update_tiles(new_kite, tiles, vertices, False)
 
                 if d3 is None:
                     new_dart = Dart()
                     if compare_coord(d1.vertices[1], d2.vertices[3]):
-                        if compare_coord(d2.vertices[1], k3.vertices[2]):
-                            new_dart.draw(d1, 'top-left')
-                        else:
+                        if compare_coord(d1.vertices[3], k1.vertices[2]):
                             new_dart.draw(d2, 'top-right')
+                        else:
+                            new_dart.draw(d1, 'top-left')
                     elif compare_coord(d1.vertices[3], d2.vertices[1]):
                         if compare_coord(d2.vertices[3], k1.vertices[2]):
                             new_dart.draw(d1, 'top-right')
@@ -271,8 +714,9 @@ def force_tiles(vertices, tiles):
                         if compare_coord(d1.vertices[3], k1.vertices[2]):
                             new_dart.draw(d1, 'top-right')
                         else:
-                            new_dart.draw(d1, 'top-left')
-                    update_tiles(new_dart, tiles, vertices)
+                            new_dart.draw(d2, 'top-right')
+                    update_tiles(new_dart, tiles, vertices, False)
+
             elif vertex_key == 'prince':
                 new_tile = Kite()
                 for val in edge_vertex.congruent_vertices:
@@ -280,7 +724,8 @@ def force_tiles(vertices, tiles):
                         new_tile.draw(val[0], 'top-right')
                     elif (val[0].name, val[1]) == ('kite', 3):
                         new_tile.draw(val[0], 'top-left')
-                update_tiles(new_tile, tiles, vertices)
+                update_tiles(new_tile, tiles, vertices, False)
+
             elif vertex_key == 'deuce-jack':
                 d1, d3 = None, None
                 k0 = None
@@ -293,6 +738,7 @@ def force_tiles(vertices, tiles):
                         k0 = val[0]
 
                 # (('dart', 1), ('dart', 3), ('kite', 0)): 'deuce-jack'
+
                 if compare_coord(d1.vertices[0], d3.vertices[0]):
                     edge_vertex.name = 'deuce'
                     new_kite = Kite()
@@ -300,7 +746,7 @@ def force_tiles(vertices, tiles):
                         new_kite.draw(k0, 'top-right')
                     else:
                         new_kite.draw(k0, 'top-left')
-                    update_tiles(new_kite, tiles, vertices)
+                    update_tiles(new_kite, tiles, vertices, False)
 
                 else:
                     edge_vertex.name = 'jack'
@@ -308,7 +754,8 @@ def force_tiles(vertices, tiles):
                     new_kite_right = Kite()
                     new_kite_left.draw(d1, 'top-right')
                     new_kite_right.draw(d3, 'top-left')
-                    update_tiles([new_kite_left, new_kite_right], tiles, vertices)
+                    update_tiles([new_kite_left, new_kite_right], tiles, vertices, False)
+
             elif vertex_key == 'king-queen':
                 k1, k3 = None, None
                 d0 = None
@@ -320,15 +767,14 @@ def force_tiles(vertices, tiles):
                     else:
                         d0 = val[0]
 
-                if compare_coord(k1.vertices[0], k3.vertices[0]):
-                    continue
-                elif compare_coord(d0.vertices[1], k3.vertices[2]) and compare_coord(d0.vertices[3], k1.vertices[2]):
+                if compare_coord(k1.vertices[2], d0.vertices[3]) and compare_coord(k3.vertices[2], d0.vertices[1]):
                     edge_vertex.name = 'queen'
                     new_left_kite = Kite()
                     new_right_kite = Kite()
                     new_left_kite.draw(k1, 'top-right')
                     new_right_kite.draw(k3, 'top-left')
-                    update_tiles([new_left_kite, new_right_kite], tiles, vertices)
+                    update_tiles([new_left_kite, new_right_kite], tiles, vertices, False)
+
             else:
                 print('error:', vertex_key)
 
@@ -339,6 +785,7 @@ def force_tiles(vertices, tiles):
 # ------------------ Helper functions ------------------
 
 # Because of the floating point rounding error, coordinates need to be compared with a tolerance.
+# default: 0.001 error tolerance with 6 point rounding accuracy
 def compare_coord(first, other):
     value = (first[0] - other[0]) + (first[1] - other[1])
     if abs(value) < 0.001:
@@ -360,7 +807,7 @@ def update_vertices(tiles, vertices):
     for tile in t:
         # update the list of all vertices
         for tile_vertex in tile.vertices:
-            # if the tile's vertex does not exist in the list of all vertices, then add it to the list.
+            # if the tile's vertices do not exist in the list of all vertices, then add it to the list.
             if not any(compare_coord(vertex.coordinates, tile_vertex) for vertex in vertices):
                 new_vertex = Vertex(tile, tile_vertex)
                 vertices.append(new_vertex)
@@ -392,20 +839,29 @@ def update_congruency(vertex, tiles):
 # Function: loops through all_tiles, comparing tiles; tile __eq__ has 2 comparisons. If the tile does not exist, the
 # function will traverse all_tiles.
 # Run Time: O(n)
-def update_tiles(tiles, all_tiles, all_vertices):
+def update_tiles(tiles, all_tiles, all_vertices, check=True):
     # update the list of all tiles
     if isinstance(tiles, list):
-        for t in tiles:
-            flag = 1
-            for s in all_tiles:
-                if s == t:
-                    flag = 0
-                    break
-            if flag:
+        if check:
+            for t in tiles:
+                flag = 1
+                for s in all_tiles:
+                    if s == t:
+                        flag = 0
+                        break
+                if flag:
+                    update_vertices(t, all_vertices)
+                    all_tiles.append(t)
+        else:
+            for t in tiles:
                 update_vertices(t, all_vertices)
                 all_tiles.append(t)
 
     else:
-        if not (tiles in all_tiles):
+        if check:
+            if not (tiles in all_tiles):
+                update_vertices(tiles, all_vertices)
+                all_tiles.append(tiles)
+        else:
             update_vertices(tiles, all_vertices)
             all_tiles.append(tiles)

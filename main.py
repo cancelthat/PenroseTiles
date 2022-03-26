@@ -29,6 +29,7 @@ game_is_running = True
 kite_is_selected = True
 wire_frame_active = False
 build_animation_active = False
+build_animation_active_reverse = False
 guide_tile_active = True
 prince_vertex_active = False
 
@@ -41,23 +42,28 @@ tiles_generated = 1
 # random note: Kings, stars, and sun don't overlap
 
 # ------------------ to-do ------------------
-# Clean up find_closest_tile functions
 # Make the prince vertex optional
-# The Vertex class has a 'tiles' attribute that I don't think I use; get rid of it.
 # Do some renaming
 # remap keys
-# get rid of bacon and eggs for tile building name
 # switch force_tiles(vertices, tiles) to force_tiles(tiles, vertices)
-# restructure the build animation loops
-# I should really think about how the recursive function works. Maybe there's a way to optimize it
 # make dictionary key hashable
+# rounding error when std_length is small
+# deflate suns
+# deflate tiles on top of current tiles
 
 
 def show_stats(amount):
+    total = 0
+    for vert in all_vertices:
+        if vert.name == 'edge':
+            total += 1
+
+    print('------------------------------------------')
     print('vertices: ', len(all_vertices))
+    print('edge vertices: ', total)
     print('tiles generated: ', len(all_tiles) - amount)
     print('total tiles: ', len(all_tiles))
-    print('------------------------------------------')
+
     if all_tiles:
         v0, v1, v2, v3 = all_tiles[0].vertices
     else:
@@ -114,8 +120,12 @@ def deflate_tiles(tiles_to_deflate):
     new_tiles = []
 
     for t in tiles_to_deflate:
-        for item in t.deflate():
-            update_tiles(item, new_tiles, new_vertices)
+        if t.name == 'kite':
+            for item in t.deflate():
+                if item.name == 'dart':
+                    update_tiles(item, new_tiles, new_vertices)
+                else:
+                    update_tiles(item, new_tiles, new_vertices, False)
 
     return new_tiles, new_vertices
 
@@ -126,8 +136,6 @@ def inflate_tiles(vertices):
 
     for vert in vertices:
         if vert.name == 'deuce':
-            # determining the vertex tiles, I don't actually need both darts since the vertex I need is the same
-            # irregardless of which it is
             kite_right, kite_left, dart = None, None, None
             for congruence in vert.congruent_vertices:
                 if congruence[0].name == 'kite':
@@ -151,7 +159,7 @@ def inflate_tiles(vertices):
             v3 = kite_right.vertices[2]
             inflated_kite = Kite()
             inflated_kite.set_vertices([v0, v1, v2, v3])
-            update_tiles(inflated_kite, new_tiles, new_vertices)
+            update_tiles(inflated_kite, new_tiles, new_vertices, False)
 
         elif vert.name == 'jack':
             dart_right, dart_left, kite = None, None, None
@@ -172,7 +180,7 @@ def inflate_tiles(vertices):
             v3 = dart_right.vertices[0]
             inflated_dart = Dart()
             inflated_dart.set_vertices([v0, v1, v2, v3])
-            update_tiles(inflated_dart, new_tiles, new_vertices)
+            update_tiles(inflated_dart, new_tiles, new_vertices, False)
 
     return new_tiles, new_vertices
 
@@ -276,6 +284,9 @@ while game_is_running:
             elif event.key == pygame.K_b:
                 build_animation_active = True
 
+            elif event.key == pygame.K_v:
+                build_animation_active_reverse = True
+
             # ------------- guide tile ---------------
             elif event.key == pygame.K_f:
                 guide_tile_active = not guide_tile_active
@@ -283,21 +294,28 @@ while game_is_running:
             # ------------- inflate ---------------
             elif event.key == pygame.K_x:
                 print('inflating')
+                start = time.time()
                 returned_tiles, returned_vertices = inflate_tiles(all_vertices)
                 if returned_tiles:
                     all_tiles = returned_tiles
                     all_vertices = returned_vertices
                     force_tiles(all_vertices, all_tiles)
                     tiles_generated = show_stats(tiles_generated)
+
                 else:
                     print('can\'t inflate')
+                end = time.time()
+                print('build time: ', round(end - start, 4), 'sec')
 
             # ------------- deflate ---------------
             elif event.key == pygame.K_z:  # deflate
                 print('deflating')
+                start = time.time()
                 all_tiles, all_vertices = deflate_tiles(all_tiles)
                 force_tiles(all_vertices, all_tiles)
                 tiles_generated = show_stats(tiles_generated)
+                end = time.time()
+                print('build time: ', round(end - start, 4), 'sec')
 
             # ------------- move tiles ---------------
             elif event.key == pygame.K_w and len(all_tiles) < 1000:
@@ -316,10 +334,10 @@ while game_is_running:
             # ------------- recolor vertices ---------------
             elif event.key == pygame.K_1:
                 for vertex in all_vertices:
-                    if vertex.name == 'edge':
+                    if vertex.name == 'sun':
                         for val in vertex.congruent_vertices:
                             fail = val[0]
-                            fail.color = (255, 255, 255)
+                            fail.set_random_color()
             elif event.key == pygame.K_2:
                 for vertex in all_vertices:
                     if vertex.name == 'star':
@@ -350,13 +368,20 @@ while game_is_running:
                         for val in vertex.congruent_vertices:
                             fail = val[0]
                             fail.set_random_color()
+            elif event.key == pygame.K_TAB:
+                for vertex in all_vertices:
+                    if vertex.name == 'edge':
+                        for val in vertex.congruent_vertices:
+                            fail = val[0]
+                            fail.color = (255, 255, 255)
 
         # Pygame Drawing
         if build_animation_active:
             temps = all_tiles.copy()
-            # temps.sort()
+            temps.sort()
             # temps.reverse()
-            for end in range(1, len(temps) + 1):
+            for end in range(1, int((len(temps) + 1)/4)):
+                end *= 4
                 for index, tile in enumerate(temps[:end]):
                     if wire_frame_active:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)
@@ -364,11 +389,29 @@ while game_is_running:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=0)
                 pygame.display.update()
 
-                build_time = 3
+                build_time = 1
                 if build_time == 0:
                     build_time = 1
                 pygame.time.wait(build_time)
             build_animation_active = False
+        elif build_animation_active_reverse:
+            temps = all_tiles.copy()
+            temps.sort()
+            temps.reverse()
+            for end in range(1, int((len(temps) + 1)/4)):
+                end *= 4
+                for index, tile in enumerate(temps[:end]):
+                    if wire_frame_active:
+                        pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)
+                    else:
+                        pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=0)
+                pygame.display.update()
+
+                build_time = 1
+                if build_time == 0:
+                    build_time = 1
+                pygame.time.wait(build_time)
+            build_animation_active_reverse = False
         else:
             if wire_frame_active:
                 for index, tile in enumerate(all_tiles):

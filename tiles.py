@@ -13,7 +13,7 @@ class Tile:
     def __init__(self, name, vertices=None):
         self.name = name
         self.vertices = vertices
-        self.color = (random.randint(15, 200), random.randint(15, 255), random.randint(15, 255))
+        self.color = (random.randint(15, 255), random.randint(15, 255), random.randint(15, 255))
         self.center = None
 
     def __eq__(self, other):

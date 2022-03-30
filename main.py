@@ -4,7 +4,7 @@ import time
 
 from kites_and_darts import Kite, Dart
 from vertex import Vertex
-from forced_tiles_recursive_functions import force_tiles, update_vertices, update_tiles, compare_coord
+from forced_tiles_recursive_functions import force_tiles, update_tiles, compare_coord
 
 # Initializer
 pygame.init()
@@ -38,6 +38,7 @@ all_tiles = []
 all_vertices = []
 guide_tile = []
 tiles_generated = 1
+last_time = 0
 
 # random note: Kings, stars, and sun don't overlap
 
@@ -50,6 +51,7 @@ tiles_generated = 1
 # rounding error when std_length is small
 # deflate suns
 # deflate tiles on top of current tiles
+# to speed up update_vertices I need the edge vertices' inside edge
 
 
 def show_stats(amount):
@@ -120,12 +122,10 @@ def deflate_tiles(tiles_to_deflate):
     new_tiles = []
 
     for t in tiles_to_deflate:
-        if t.name == 'kite':
+        if t.name == 'dart':
             for item in t.deflate():
                 if item.name == 'dart':
                     update_tiles(item, new_tiles, new_vertices)
-                else:
-                    update_tiles(item, new_tiles, new_vertices, False)
 
     return new_tiles, new_vertices
 
@@ -234,15 +234,17 @@ while game_is_running:
                 if created_tile is None:
                     print('tile already exists')
                 else:
+                    if last_time >= 5:
+                        print('estimated build time: ', round(last_time * 7.23905609893, 4), ' sec')
                     start = time.time()
 
-                    all_tiles.append(created_tile)
-                    update_vertices(created_tile, all_vertices)
+                    update_tiles(created_tile, all_tiles, all_vertices, False)
                     force_tiles(all_vertices, all_tiles)
 
                     end = time.time()
-                    print('build time: ', round(end - start, 4), 'sec')
                     tiles_generated = show_stats(tiles_generated)
+                    last_time = round(end - start, 4)
+                    print('build time: ', round(end - start, 4), 'sec')
 
         # Key press event handlers
         if event.type == pygame.KEYUP:
@@ -275,10 +277,10 @@ while game_is_running:
 
             # ------------- reset ---------------
             elif event.key == pygame.K_r:
-                initial_tile.initial_shape((DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), unit_length=UNIT_LENGTH)
-                all_tiles = [initial_tile]
+                all_tiles = []
                 all_vertices = []
-                update_vertices(initial_tile, all_vertices)
+                initial_tile.initial_shape((DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), unit_length=UNIT_LENGTH)
+                update_tiles(initial_tile, all_tiles, all_vertices)
 
             # ------------- run build animation ---------------
             elif event.key == pygame.K_b:
@@ -305,16 +307,28 @@ while game_is_running:
                 else:
                     print('can\'t inflate')
                 end = time.time()
+                last_time = round(end - start, 4)
                 print('build time: ', round(end - start, 4), 'sec')
 
             # ------------- deflate ---------------
-            elif event.key == pygame.K_z:  # deflate
+            # 0.0000357142857142 - 112 - 94 - 0.004 sec
+            # 0.0001605504587155 - 218 - 191 - 0.035 sec
+            # 0.0006541528239202 - 602 - 555 - 0.3938 sec
+            # 0.0018010539367638 - 1613 - 1538 - 2.9051 sec
+            # 0.0048692325581395 - 4300 - 4175 - 20.9377 sec
+            # 0.0133823107926556 - 11366 - 11165 - 149.4135 sec
+            # (time / vertices) * e^2
+            elif event.key == pygame.K_z:
                 print('deflating')
+                if last_time >= 2:
+                    print('~ estimated build time: ', round(last_time * 7.23905609893, 4), ' sec')
+
                 start = time.time()
                 all_tiles, all_vertices = deflate_tiles(all_tiles)
                 force_tiles(all_vertices, all_tiles)
                 tiles_generated = show_stats(tiles_generated)
                 end = time.time()
+                last_time = round(end - start, 4)
                 print('build time: ', round(end - start, 4), 'sec')
 
             # ------------- move tiles ---------------
@@ -378,10 +392,10 @@ while game_is_running:
         # Pygame Drawing
         if build_animation_active:
             temps = all_tiles.copy()
-            temps.sort()
+            # temps.sort()
             # temps.reverse()
-            for end in range(1, int((len(temps) + 1)/4)):
-                end *= 4
+            for end in range(1, int((len(temps) + 1)/5)):
+                end *= 5
                 for index, tile in enumerate(temps[:end]):
                     if wire_frame_active:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)
@@ -396,10 +410,10 @@ while game_is_running:
             build_animation_active = False
         elif build_animation_active_reverse:
             temps = all_tiles.copy()
-            temps.sort()
+            # temps.sort()
             temps.reverse()
-            for end in range(1, int((len(temps) + 1)/4)):
-                end *= 4
+            for end in range(1, int((len(temps) + 1)/5)):
+                end *= 5
                 for index, tile in enumerate(temps[:end]):
                     if wire_frame_active:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)

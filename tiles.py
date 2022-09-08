@@ -1,8 +1,6 @@
 import math
 import random
 
-fall_colors = [(253, 197, 52), (251, 171, 52), (235, 137, 71), (199, 90, 72), (176, 59, 55), (110, 49, 68)]
-
 
 class Tile:
 
@@ -15,6 +13,7 @@ class Tile:
         self.vertices = vertices
         self.color = (random.randint(15, 255), random.randint(15, 255), random.randint(15, 255))
         self.center = None
+        self.congruent_vertices = []
 
     def __eq__(self, other):
         if self.name != other.name:

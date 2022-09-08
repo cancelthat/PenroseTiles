@@ -3,7 +3,6 @@ import math
 import time
 
 from kites_and_darts import Kite, Dart
-from vertex import Vertex
 from forced_tiles_recursive_functions import force_tiles, update_tiles, compare_coord
 
 # Initializer
@@ -122,10 +121,10 @@ def deflate_tiles(tiles_to_deflate):
     new_tiles = []
 
     for t in tiles_to_deflate:
-        if t.name == 'dart':
+        if t.name == 'kite':
             for item in t.deflate():
-                if item.name == 'dart':
-                    update_tiles(item, new_tiles, new_vertices)
+                if item.name == 'kite':
+                    update_tiles(item, new_tiles, new_vertices, False)
 
     return new_tiles, new_vertices
 
@@ -202,9 +201,7 @@ def move_tiles(tiles, displacement):
 # -------------- Pre-Game Initialization ----------------
 #
 initial_tile.initial_shape((DISPLAY_WIDTH / 2, DISPLAY_HEIGHT / 2), unit_length=UNIT_LENGTH)
-all_tiles.append(initial_tile)
-for vertex_coordinates in initial_tile.vertices:
-    all_vertices.append(Vertex(initial_tile, vertex_coordinates))
+update_tiles(initial_tile, all_tiles, all_vertices)
 #
 # --------------------- Game Loop -----------------------
 while game_is_running:
@@ -392,10 +389,8 @@ while game_is_running:
         # Pygame Drawing
         if build_animation_active:
             temps = all_tiles.copy()
-            # temps.sort()
-            # temps.reverse()
-            for end in range(1, int((len(temps) + 1)/5)):
-                end *= 5
+            for end in range(1, int((len(temps) + 1)/1)):
+                end *= 1
                 for index, tile in enumerate(temps[:end]):
                     if wire_frame_active:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=2)
@@ -403,14 +398,13 @@ while game_is_running:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=0)
                 pygame.display.update()
 
-                build_time = 1
+                build_time = 800
                 if build_time == 0:
                     build_time = 1
                 pygame.time.wait(build_time)
             build_animation_active = False
         elif build_animation_active_reverse:
             temps = all_tiles.copy()
-            # temps.sort()
             temps.reverse()
             for end in range(1, int((len(temps) + 1)/5)):
                 end *= 5

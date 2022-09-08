@@ -71,7 +71,6 @@ def force_tiles(vertices, tiles):
                 edge_vertices.append(vertex)
 
         for edge_vertex in edge_vertices:
-
             set_ = []
             for vert in edge_vertex.congruent_vertices:
                 set_.append((vert[0].name, vert[1]))
@@ -797,69 +796,37 @@ def compare_coord(first, other):
     return False
 
 
-# Run time for all update functions: O(n^2), where n is len(all_tiles)
-
-# Function: 4 tile vertices loop through all vertices comparing coordinates
-# Run Time: O(n): 4n
-def update_vertices(tile, all_vertices):
-
-    # update the list of all vertices
-    for tile_vertex in tile.vertices:
-        # if the tile's vertices do not exist in the list of all vertices, then add it to the list.
-        if not any(compare_coord(vertex.coordinates, tile_vertex) for vertex in all_vertices):
-            new_vertex = Vertex(tile, tile_vertex)
-            all_vertices.append(new_vertex)
-            update_congruency(new_vertex, tile)
-        else:
-            # if it does exist, then update the existing vertex's congruency.
-            vert = [vertex for vertex in all_vertices if compare_coord(vertex.coordinates, tile_vertex)]
-            update_congruency(vert[0], tile)
-
-
-# Function: tile.vertices(4) * vertex.congruent_vertices(4) = 16 calls, appends
-# Run Time: O(1): 128 operations per tile
-def update_congruency(vertex, tiles):
-    t = []
-    if isinstance(tiles, list):
-        t = tiles
-    else:
-        t.append(tiles)
-
-    for tile in t:
-        # update the congruent vertices for vertex
-        for index, tile_vertex in enumerate(tile.vertices):
-            # if (tile, index) is not in congruent vertices
-            if not (tile, index) in vertex.congruent_vertices:
-                if compare_coord(vertex.coordinates, tile.vertices[index]):
-                    vertex.congruent_vertices.append((tile, index))
-
-
-# Function: loops through all_tiles, comparing tiles; tile __eq__ has 2 comparisons. If the tile does not exist, the
-# function will traverse all_tiles.
-# Run Time: O(n)
 def update_tiles(tiles, all_tiles, all_vertices, check=True):
-    # update the list of all tiles
     if isinstance(tiles, list):
         if check:
             for t in tiles:
-                flag = 1
-                for s in all_tiles:
-                    if s == t:
-                        flag = 0
-                        break
-                if flag:
-                    update_vertices(t, all_vertices)
+                if t in all_tiles:
                     all_tiles.append(t)
+                    update_vertices(t, all_vertices)
         else:
             for t in tiles:
-                update_vertices(t, all_vertices)
                 all_tiles.append(t)
+                update_vertices(t, all_vertices)
 
     else:
         if check:
-            if not (tiles in all_tiles):
-                update_vertices(tiles, all_vertices)
+            if tiles not in all_tiles:
                 all_tiles.append(tiles)
+                update_vertices(tiles, all_vertices)
         else:
-            update_vertices(tiles, all_vertices)
             all_tiles.append(tiles)
+            update_vertices(tiles, all_vertices)
+
+
+def update_vertices(tile, all_vertices):
+    for tile_index, tile_vertex in enumerate(tile.vertices):
+        vertex = Vertex(tile_vertex)
+        if vertex in all_vertices:
+            try:
+                vertex_index = all_vertices.index(vertex)
+                all_vertices[vertex_index].congruent_vertices.append((tile, tile_index))
+            except ValueError:
+                print(ValueError, 'Value Error: update_vertices()')
+        else:
+            all_vertices.append(vertex)
+            vertex.congruent_vertices.append((tile, tile_index))

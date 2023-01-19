@@ -10,7 +10,7 @@ pygame.init()
 
 # Adjustable Variables
 initial_tile = Kite()
-UNIT_LENGTH = 20
+UNIT_LENGTH = 60
 displacement_amount = 25
 
 # Display Dimensions
@@ -103,7 +103,6 @@ def create_new_tile(tiles):
 
     new_kite = Kite()
     new_dart = Dart()
-
     new_kite.draw(closest_tile, direction)
     new_dart.draw(closest_tile, direction)
 
@@ -264,6 +263,13 @@ while game_is_running:
             elif event.key == pygame.K_ESCAPE:
                 game_is_running = False
 
+            # ---------- quit ------------
+            elif event.key == pygame.K_p:
+                tiles_to_print = []
+                for print_tile in all_tiles:
+                    tiles_to_print.append(print_tile.vertices)
+                print(tiles_to_print)
+
             # ------------- assign new colors ---------------
             elif event.key == pygame.K_e:   # random
                 for tile in all_tiles:
@@ -398,7 +404,7 @@ while game_is_running:
                         pygame.draw.polygon(DISPLAY, tile.color, tile.vertices, width=0)
                 pygame.display.update()
 
-                build_time = 800
+                build_time = 1
                 if build_time == 0:
                     build_time = 1
                 pygame.time.wait(build_time)

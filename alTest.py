@@ -1,3 +1,6 @@
+import pygame
+import math
+
 from kite import Kite
 from dart import Dart
 from vertexTest import Vertex
@@ -92,81 +95,10 @@ def force_tiles(all_tiles, all_vertices):
                             kite3 = val[0]
 
                     if kite1 is None:
-                        new_kite = Kite()
-                        new_kite.draw(dart, 'bottom-left')
-                        all_tiles.append(new_kite)
-
-                        # Assign vertices
-                        d0, d1, d2, d3 = dart.vertices
-                        a0 = d3
-                        a1 = d2
-                        a2 = vertex_exists(new_kite.vertex_coordinates[2], d2)
-                        a3 = vertex_exists(new_kite.vertex_coordinates[3], d3)
-
-                        switch = True if not a2 or not a3 else False
-
-                        # Create a new Vertex if nothing is found
-                        if not a2:
-                            a2 = Vertex(new_kite.vertex_coordinates[2], [a1])
-                            all_vertices.append(a2)
-                            a1.adjacent_vertices.append(a2)
-
-                        if not a3:
-                            a3 = Vertex(new_kite.vertex_coordinates[3], [a0])
-                            all_vertices.append(a3)
-                            a0.adjacent_vertices.append(a3)
-
-                        if switch:
-                            a2.adjacent_vertices.append(a3)
-                            a3.adjacent_vertices.append(a2)
-
-                        # Add vertex components
-                        a0.vertex_components.append((new_kite, 0))
-                        a1.vertex_components.append((new_kite, 1))
-                        a2.vertex_components.append((new_kite, 2))
-                        a3.vertex_components.append((new_kite, 3))
-
-                        new_kite.vertices = [a0, a1, a2, a3]
+                        add_kite(dart, 'bottom-left', all_tiles, all_vertices)
 
                     if kite3 is None:
-                        new_kite = Kite()
-                        new_kite.draw(dart, 'bottom-right')
-                        all_tiles.append(new_kite)
-
-                        # Assign vertices
-                        d0, d1, d2, d3 = dart.vertices
-                        b0 = d1
-                        b1 = vertex_exists(new_kite.vertex_coordinates[1], d1)
-                        b2 = vertex_exists(new_kite.vertex_coordinates[2], d2)
-                        b3 = d2
-
-                        switch = True if not b1 or not b2 else False
-
-                        if not b1:
-                            b1 = Vertex(new_kite.vertex_coordinates[1])
-                            all_vertices.append(b1)
-
-                            b0.adjacent_vertices.append(b1)
-                            b1.adjacent_vertices.append(b0)
-
-                        if not b2:
-                            b2 = Vertex(new_kite.vertex_coordinates[2])
-                            all_vertices.append(b2)
-
-                            b2.adjacent_vertices.append(b3)
-                            b3.adjacent_vertices.append(b2)
-
-                        if switch:
-                            b1.adjacent_vertices.append(b2)
-                            b2.adjacent_vertices.append(b1)
-
-                        # Add vertex components
-                        b0.vertex_components.append((new_kite, 0))
-                        b1.vertex_components.append((new_kite, 1))
-                        b2.vertex_components.append((new_kite, 2))
-                        b3.vertex_components.append((new_kite, 3))
-
-                        new_kite.vertices = [b0, b1, b2, b3]
+                        add_kite(dart, 'bottom-right', all_tiles, all_vertices)
 
                 elif vertex_key == 'deuce':
                     edge_vertex.name = 'deuce'
@@ -190,80 +122,9 @@ def force_tiles(all_tiles, all_vertices):
                         left_kite = holder
 
                     if dart1 is None:
-                        new_dart1 = Dart()
-                        new_dart1.draw(left_kite, 'top-left')
-                        all_tiles.append(new_dart1)
-
-                        # Assign vertices
-                        k0, k1, k2, k3 = left_kite.vertices
-                        c0 = vertex_exists(new_dart1.vertex_coordinates[0], k0)
-                        c1 = k0
-                        c2 = k3
-                        c3 = vertex_exists(new_dart1.vertex_coordinates[3], k3)
-
-                        switch = True if not c0 or not c3 else False
-
-                        if not c0:
-                            c0 = Vertex(new_dart1.vertex_coordinates[0], [c1])
-                            all_vertices.append(c0)
-                            c1.adjacent_vertices.append(c0)
-
-                        if not c3:
-                            c3 = Vertex(new_dart1.vertex_coordinates[3], [c2])
-                            all_vertices.append(c3)
-                            c2.adjacent_vertices.append(c3)
-
-                        if switch:
-                            c0.adjacent_vertices.append(c3)
-                            c3.adjacent_vertices.append(c0)
-
-                        # Add vertex components
-                        c0.vertex_components.append((new_dart1, 0))
-                        c1.vertex_components.append((new_dart1, 1))
-                        c2.vertex_components.append((new_dart1, 2))
-                        c3.vertex_components.append((new_dart1, 3))
-
-                        new_dart1.vertices = [c0, c1, c2, c3]
-
+                        add_dart(left_kite, 'top-left', all_tiles, all_vertices)
                     if dart3 is None:
-                        new_dart3 = Dart()
-                        new_dart3.draw(right_kite, 'top-right')
-                        all_tiles.append(new_dart3)
-
-                        # Assign vertices
-                        k0, k1, k2, k3 = right_kite.vertices
-                        d0 = vertex_exists(new_dart3.vertex_coordinates[0], k0)
-                        d1 = vertex_exists(new_dart3.vertex_coordinates[1], k1)
-                        d2 = k1
-                        d3 = k0
-
-                        switch = True if not d0 or not d1 else False
-
-                        if not d0:
-                            d0 = Vertex(new_dart3.vertex_coordinates[0])
-                            all_vertices.append(d0)
-
-                            d0.adjacent_vertices.append(d3)
-                            d3.adjacent_vertices.append(d0)
-
-                        if not d1:
-                            d1 = Vertex(new_dart3.vertex_coordinates[1])
-                            all_vertices.append(d1)
-
-                            d1.adjacent_vertices.append(d2)
-                            d2.adjacent_vertices.append(d1)
-
-                        if switch:
-                            d0.adjacent_vertices.append(d1)
-                            d1.adjacent_vertices.append(d0)
-
-                        # Add vertex components
-                        d0.vertex_components.append((new_dart3, 0))
-                        d1.vertex_components.append((new_dart3, 1))
-                        d2.vertex_components.append((new_dart3, 2))
-                        d3.vertex_components.append((new_dart3, 3))
-
-                        new_dart3.vertices = [d0, d1, d2, d3]
+                        add_dart(right_kite, 'top-right', all_tiles, all_vertices)
 
                 elif vertex_key == 'star':
                     edge_vertex.name = 'star'
@@ -274,161 +135,31 @@ def force_tiles(all_tiles, all_vertices):
 
                     for dart in darts:
                         if len(dart.vertices[1].vertex_components) == 2:
-                            new_dart = Dart()
-                            new_dart.draw(dart, 'top-right')
-                            all_tiles.append(new_dart)
-
-                            d0, d1, d2, d3 = dart.vertices
-                            v0 = d0
-                            v1 = vertex_exists(new_dart.vertex_coordinates[1], d0)  # should always exist
-                            v2 = vertex_exists(new_dart.vertex_coordinates[2], d1)
-                            v3 = d1
-
-                            if not v2:
-                                v2 = Vertex(new_dart.vertex_coordinates[2], [v1, v3])
-                                all_vertices.append(v2)
-                                v1.adjacent_vertices.append(v2)
-                                v3.adjacent_vertices.append(v2)
-
-                            # Add vertex components
-                            v0.vertex_components.append((new_dart, 0))
-                            v1.vertex_components.append((new_dart, 1))
-                            v2.vertex_components.append((new_dart, 2))
-                            v3.vertex_components.append((new_dart, 3))
-
-                            new_dart.vertices = [v0, v1, v2, v3]
+                            add_dart(dart, 'top-right', all_tiles, all_vertices)
 
                 elif vertex_key == 'sun':
                     edge_vertex.name = 'sun'
 
-                    kites = []
+                    kites = []  # list of kites contained in the sun vertex
                     for val in edge_vertex.vertex_components:
                         kites.append(val[0])
 
-                    edge_kites = []
                     for adj in edge_vertex.adjacent_vertices:
-                        adj_kites = []
+                        adj_kites = []  # list of kites contained in each of the sun's adjacent vertices
                         for comp in adj.vertex_components:
                             if comp[0].name == 'kite':
                                 adj_kites.append(comp[0])
 
-                        total = 0
-                        for ad in adj_kites:
-                            total += kites.count(ad)
-
-                        if total == 1:
-                            edge_kites.append(adj_kites[0])  # since there is only one match, it is adj_kites[0]
-
+                        if len(set(kites) & set(adj_kites)) == 1:
+                            item = (set(kites) & set(adj_kites)).pop()
                             if len(kites) == 3:
-                                if adj_kites[0].vertices.index(adj) == 1:
-                                    new_kite = Kite()
-                                    new_kite.draw(adj_kites[0], 'bottom-right')
-                                    all_tiles.append(new_kite)
-
-                                    # Assign vertices
-                                    k0, k1, k2, k3 = adj_kites[0].vertices
-                                    c0 = vertex_exists(new_kite.vertex_coordinates[0], k1)
-                                    c1 = vertex_exists(new_kite.vertex_coordinates[1], k2)
-                                    c2 = k2
-                                    c3 = k1
-
-                                    switch = True if not c0 or not c1 else False
-
-                                    if not c0:
-                                        c0 = Vertex(new_kite.vertex_coordinates[0], [c3])
-                                        all_vertices.append(c0)
-                                        c3.adjacent_vertices.append(c0)
-
-                                    if not c1:
-                                        c1 = Vertex(new_kite.vertex_coordinates[3], [c2])
-                                        all_vertices.append(c1)
-                                        c2.adjacent_vertices.append(c1)
-
-                                    if switch:
-                                        c0.adjacent_vertices.append(c1)
-                                        c1.adjacent_vertices.append(c0)
-
-                                    # Add vertex components
-                                    c0.vertex_components.append((new_kite, 0))
-                                    c1.vertex_components.append((new_kite, 1))
-                                    c2.vertex_components.append((new_kite, 2))
-                                    c3.vertex_components.append((new_kite, 3))
-
-                                    new_kite.vertices = [c0, c1, c2, c3]
-
-                                elif adj_kites[0].vertices.index(adj) == 3:
-                                    new_kite = Kite()
-                                    new_kite.draw(adj_kites[0], 'bottom-left')
-                                    all_tiles.append(new_kite)
-
-                                    # Assign vertices
-                                    k0, k1, k2, k3 = adj_kites[0].vertices
-                                    c0 = vertex_exists(new_kite.vertex_coordinates[0], k0)
-                                    c1 = k3
-                                    c2 = k2
-                                    c3 = vertex_exists(new_kite.vertex_coordinates[3], k3)
-
-                                    switch = True if not c0 or not c3 else False
-
-                                    if not c0:
-                                        c0 = Vertex(new_kite.vertex_coordinates[0], [c1])
-                                        all_vertices.append(c0)
-                                        c1.adjacent_vertices.append(c0)
-
-                                    if not c3:
-                                        c3 = Vertex(new_kite.vertex_coordinates[3], [c2])
-                                        all_vertices.append(c3)
-                                        c2.adjacent_vertices.append(c3)
-
-                                    if switch:
-                                        c0.adjacent_vertices.append(c3)
-                                        c3.adjacent_vertices.append(c0)
-
-                                    # Add vertex components
-                                    c0.vertex_components.append((new_kite, 0))
-                                    c1.vertex_components.append((new_kite, 1))
-                                    c2.vertex_components.append((new_kite, 2))
-                                    c3.vertex_components.append((new_kite, 3))
-
-                                    new_kite.vertices = [c0, c1, c2, c3]
+                                if item.vertices.index(adj) == 1:
+                                    add_kite(item, 'bottom-right', all_tiles, all_vertices)
+                                elif item.vertices.index(adj) == 3:
+                                    add_kite(item, 'bottom-left', all_tiles, all_vertices)
                             elif len(kites) == 4:
-                                if adj_kites[0].vertices.index(adj) == 1:
-                                    new_kite = Kite()
-                                    new_kite.draw(adj_kites[0], 'bottom-right')
-                                    all_tiles.append(new_kite)
-
-                                    # Assign vertices
-                                    k0, k1, k2, k3 = adj_kites[0].vertices
-                                    c0 = vertex_exists(new_kite.vertex_coordinates[0], k1)
-                                    c1 = vertex_exists(new_kite.vertex_coordinates[1], k2)
-                                    c2 = k2
-                                    c3 = k1
-
-                                    switch = True if not c0 or not c1 else False
-
-                                    if not c0:
-                                        c0 = Vertex(new_kite.vertex_coordinates[0], [c3])
-                                        all_vertices.append(c0)
-                                        c3.adjacent_vertices.append(c0)
-
-                                    if not c1:
-                                        c1 = Vertex(new_kite.vertex_coordinates[3], [c2])
-                                        all_vertices.append(c1)
-                                        c2.adjacent_vertices.append(c1)
-
-                                    if switch:
-                                        c0.adjacent_vertices.append(c1)
-                                        c1.adjacent_vertices.append(c0)
-
-                                    # Add vertex components
-                                    c0.vertex_components.append((new_kite, 0))
-                                    c1.vertex_components.append((new_kite, 1))
-                                    c2.vertex_components.append((new_kite, 2))
-                                    c3.vertex_components.append((new_kite, 3))
-
-                                    new_kite.vertices = [c0, c1, c2, c3]
-
-                    # print('edge kites', edge_kites)
+                                if item.vertices.index(adj) == 1:
+                                    add_kite(item, 'bottom-right', all_tiles, all_vertices)
 
                 elif vertex_key == 'jack':
                     pass
@@ -457,3 +188,252 @@ def vertex_exists(coordinates, vertex):
         if compare_coordinates(coordinates, adj_vertex.coordinates):
             return adj_vertex
     return False
+
+
+# Distance from a point to the cursor
+def dist(p):
+    x, y = pygame.mouse.get_pos()
+    return math.sqrt((p[0] - x) ** 2 + (p[1] - y) ** 2)
+
+
+def add_kite(neighbor_tile, direction, tiles, vertices):
+    new_tile = Kite()
+    new_tile.draw(neighbor_tile, direction)
+
+    g0, g1, g2, g3 = neighbor_tile.vertices
+    h0, h1, h2, h3 = new_tile.vertex_coordinates
+    v0 = v1 = v2 = v3 = False
+    if neighbor_tile.name == 'kite':
+        if direction == 'top-right':
+            v0 = g0
+            v1 = vertex_exists(h1, g0)
+            v2 = vertex_exists(h2, g1)
+            v3 = g1
+        elif direction == 'bottom-right':
+            v0 = vertex_exists(h0, g1)
+            v1 = vertex_exists(h1, g2)
+            v2 = g2
+            v3 = g1
+        elif direction == 'bottom-left':
+            v0 = vertex_exists(h0, g3)
+            v1 = g3
+            v2 = g2
+            v3 = vertex_exists(h3, g2)
+        elif direction == 'top-left':
+            v0 = g0
+            v1 = g3
+            v2 = vertex_exists(h2, g3)
+            v3 = vertex_exists(h3, g0)
+
+    elif neighbor_tile.name == 'dart':
+        if direction == 'top-right':
+            v0 = vertex_exists(h0, g0)
+            v1 = vertex_exists(h1, g1)
+            v2 = g1
+            v3 = g0
+        elif direction == 'bottom-right':
+            v0 = g1
+            v1 = vertex_exists(h1, g1)
+            v2 = vertex_exists(h2, g2)
+            v3 = g2
+        elif direction == 'bottom-left':
+            v0 = g3
+            v1 = g2
+            v2 = vertex_exists(h2, g2)
+            v3 = vertex_exists(h3, g3)
+        elif direction == 'top-left':
+            v0 = vertex_exists(h0, g0)
+            v1 = g0
+            v2 = g3
+            v3 = vertex_exists(h3, g3)
+
+    tiles.append(new_tile)
+    new_vertices, vertices_to_add = link_vertices([v0, v1, v2, v3], new_tile)
+    new_tile.vertices = new_vertices
+    vertices.extend(vertices_to_add)
+
+    return "kite appended."
+
+
+def add_dart(neighbor_tile, direction, tiles, vertices):
+    new_tile = Dart()
+    new_tile.draw(neighbor_tile, direction)
+
+    g0, g1, g2, g3 = neighbor_tile.vertices
+    h0, h1, h2, h3 = new_tile.vertex_coordinates
+    v0 = v1 = v2 = v3 = False
+    if neighbor_tile.name == 'kite':
+        if direction == 'top-right':
+            v0 = vertex_exists(h0, g0)
+            v1 = vertex_exists(h1, g1)
+            v2 = g1
+            v3 = g0
+        elif direction == 'bottom-right':
+            v0 = g1
+            v1 = vertex_exists(h1, g1)
+            v2 = vertex_exists(h2, g2)
+            v3 = g2
+        elif direction == 'bottom-left':
+            v0 = g3
+            v1 = g2
+            v2 = vertex_exists(h2, g2)
+            v3 = vertex_exists(h3, g3)
+        elif direction == 'top-left':
+            v0 = vertex_exists(h0, g0)
+            v1 = g0
+            v2 = g3
+            v3 = vertex_exists(h3, g3)
+
+    elif neighbor_tile.name == 'dart':
+        if direction == 'top-right':
+            v0 = g0
+            v1 = vertex_exists(h1, g0)
+            v2 = vertex_exists(h2, g1)
+            v3 = g1
+        elif direction == 'top-left':
+            v0 = g0
+            v1 = g3
+            v2 = vertex_exists(h2, g3)
+            v3 = vertex_exists(h3, g0)
+        else:
+            print('error in direction: ', direction)
+
+    tiles.append(new_tile)
+    new_vertices, vertices_to_add = link_vertices([v0, v1, v2, v3], new_tile)
+    new_tile.vertices = new_vertices
+    vertices.extend(vertices_to_add)
+
+    return 'dart appended'
+
+
+def link_vertices(new_vertices, new_tile):
+    v0, v1, v2, v3 = new_vertices
+    w0, w1, w2, w3 = new_tile.vertex_coordinates
+    return_vertices = []
+    if bool(v0) + bool(v1) + bool(v2) + bool(v3) == 2:  # Need to figure out the single False condition
+        if (not v0 and not v1) or (not v2 and not v3):
+            switch = True if not v0 or not v1 else False
+            if not v0:
+                v0 = Vertex(w0, [v3])
+                return_vertices.append(v0)
+                v3.adjacent_vertices.append(v0)
+            if not v1:
+                v1 = Vertex(w1, [v2])
+                return_vertices.append(v1)
+                v2.adjacent_vertices.append(v1)
+            if not v2:
+                v2 = Vertex(w2, [v1])
+                return_vertices.append(v2)
+                v1.adjacent_vertices.append(v2)
+            if not v3:
+                v3 = Vertex(w3, [v0])
+                return_vertices.append(v3)
+                v0.adjacent_vertices.append(v3)
+
+            if switch:
+                v0.adjacent_vertices.append(v1)
+                v1.adjacent_vertices.append(v0)
+            else:
+                v2.adjacent_vertices.append(v3)
+                v3.adjacent_vertices.append(v2)
+
+        elif (not v1 and not v2) or (not v0 and not v3):
+            switch = True if not v1 or not v2 else False
+            if not v0:
+                v0 = Vertex(w0, [v1])
+                return_vertices.append(v0)
+                v1.adjacent_vertices.append(v0)
+            if not v1:
+                v1 = Vertex(w1, [v0])
+                return_vertices.append(v1)
+                v0.adjacent_vertices.append(v1)
+            if not v2:
+                v2 = Vertex(w2, [v3])
+                return_vertices.append(v2)
+                v3.adjacent_vertices.append(v2)
+            if not v3:
+                v3 = Vertex(w3, [v2])
+                return_vertices.append(v3)
+                v2.adjacent_vertices.append(v3)
+
+            if switch:
+                v1.adjacent_vertices.append(v2)
+                v2.adjacent_vertices.append(v1)
+            else:
+                v0.adjacent_vertices.append(v3)
+                v3.adjacent_vertices.append(v0)
+
+    elif bool(v0) + bool(v1) + bool(v2) + bool(v3) == 3:
+        if not v0:
+            v0 = Vertex(w0, [v1, v3])
+            return_vertices.append(v0)
+            v1.adjacent_vertices.append(v0)
+            v3.adjacent_vertices.append(v0)
+        elif not v1:
+            v1 = Vertex(w1, [v0, v2])
+            return_vertices.append(v1)
+            v0.adjacent_vertices.append(v1)
+            v2.adjacent_vertices.append(v1)
+        elif not v2:
+            v2 = Vertex(w2, [v1, v3])
+            return_vertices.append(v2)
+            v1.adjacent_vertices.append(v2)
+            v3.adjacent_vertices.append(v2)
+        elif not v3:
+            v3 = Vertex(w3, [v0, v2])
+            return_vertices.append(v3)
+            v0.adjacent_vertices.append(v3)
+            v2.adjacent_vertices.append(v3)
+
+    elif bool(v0) + bool(v1) + bool(v2) + bool(v3) == 4:
+
+        switch0 = switch1 = switch2 = switch3 = 0
+        for adjacent_vertex in v0.adjacent_vertices:
+            if adjacent_vertex == v1 or adjacent_vertex == v3:
+                switch0 += 1
+
+        for adjacent_vertex in v1.adjacent_vertices:
+            if adjacent_vertex == v0 or adjacent_vertex == v2:
+                switch1 += 1
+
+        for adjacent_vertex in v2.adjacent_vertices:
+            if adjacent_vertex == v1 or adjacent_vertex == v3:
+                switch2 += 1
+
+        for adjacent_vertex in v3.adjacent_vertices:
+            if adjacent_vertex == v0 or adjacent_vertex == v2:
+                switch3 += 1
+
+        if switch0 == 1:
+            if v1 in v0.adjacent_vertices:
+                v0.adjacent_vertices.append(v3)
+            elif v3 in v0.adjacent_vertices:
+                v0.adjacent_vertices.append(v1)
+
+        if switch1 == 1:
+            if v0 in v1.adjacent_vertices:
+                v1.adjacent_vertices.append(v2)
+            elif v2 in v1.adjacent_vertices:
+                v1.adjacent_vertices.append(v0)
+
+        if switch2 == 1:
+            if v1 in v2.adjacent_vertices:
+                v2.adjacent_vertices.append(v3)
+            elif v3 in v2.adjacent_vertices:
+                v2.adjacent_vertices.append(v1)
+
+        if switch3 == 1:
+            if v0 in v3.adjacent_vertices:
+                v3.adjacent_vertices.append(v2)
+            elif v2 in v3.adjacent_vertices:
+                v3.adjacent_vertices.append(v0)
+
+    else:
+        print('eR%%ROR')
+
+    v0.vertex_components.append((new_tile, 0))
+    v1.vertex_components.append((new_tile, 1))
+    v2.vertex_components.append((new_tile, 2))
+    v3.vertex_components.append((new_tile, 3))
+
+    return [v0, v1, v2, v3], return_vertices

@@ -10,7 +10,7 @@ pygame.init()
 
 # Adjustable Variables
 initial_tile = Kite()
-UNIT_LENGTH = 60
+UNIT_LENGTH = 18
 displacement_amount = 25
 
 # Display Dimensions
